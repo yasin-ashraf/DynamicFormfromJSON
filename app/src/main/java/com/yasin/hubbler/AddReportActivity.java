@@ -13,7 +13,6 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
@@ -42,7 +41,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
     private Map<String,Boolean> viewRequiredMap = new HashMap<>();
     private FrameLayout buttonDone;
     private static final int FLAG_PHONE = 1;
-    private static final int FLAG_PIN_CODE = 1 << 2;
+    private static final int FLAG_FIELD_REQUIRED = 1 << 2;
     private int mErrorFlags;
 
     @Override
@@ -199,16 +198,19 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
     private void validateEditTexts() {
         for(int i=0;i<editTextTags.size();i++){
             TextInputEditText editText = container.findViewWithTag(editTextTags.get(i));
-            String value = editText.getText().toString().trim();
+            String text = editText.getText().toString().trim();
             if(viewRequiredMap.get(editTextTags.get(i))){
-                if (value.equals("")) {
-                    mErrorFlags |= FLAG_PIN_CODE;
+                if (text.equals("")) {
+                    mErrorFlags |= FLAG_FIELD_REQUIRED;
                     TextInputLayout textInputLayout = container.findViewWithTag(inputLayoutTags.get(i));
                     textInputLayout.setError(getString(R.string.error_blank));
                 } else {
-                    mErrorFlags &= ~FLAG_PIN_CODE;
+                    mErrorFlags &= ~FLAG_FIELD_REQUIRED;
+                    // Store text
                 }
             }
+
+
         }
     }
 
