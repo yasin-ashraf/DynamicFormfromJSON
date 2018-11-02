@@ -1,5 +1,6 @@
 package com.yasin.hubbler;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +44,11 @@ public class ReportsActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public void onClick(View view) {
-
+        switch (view.getId()){
+            case R.id.button_add_report:
+                startActivity(new Intent(this,AddReportActivity.class));
+                overridePendingTransition(R.anim.enter, R.anim.exit);
+                break;
+        }
     }
 }

@@ -3,4 +3,6 @@
     <string name="total_reports">Total Reports :</string>
     <string name="label_add_report">Add Report</string>
     <string name="no_reports_added_yet">No reports added yet.</string>
+    <string name="label_done">Done</string>
+    <string name="label_add_a_report">Add a Report</string>
 </resources>
