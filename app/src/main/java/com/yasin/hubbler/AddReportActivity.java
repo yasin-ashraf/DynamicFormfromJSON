@@ -26,7 +26,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by im_yasinashraf started on 1/11/18.
@@ -37,6 +39,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
     private LinearLayout container;
     private List<String> editTextTags = new ArrayList<>();
     private List<String> inputLayoutTags = new ArrayList<>();
+    private Map<String,Boolean> viewRequiredMap = new HashMap<>();
     private FrameLayout buttonDone;
     private static final int FLAG_PHONE = 1;
     private static final int FLAG_PIN_CODE = 1 << 2;
@@ -79,7 +82,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                 JSONObject viewObject = viewArray.getJSONObject(i);
                 String fieldName = viewObject.getString("field-name");
                 String type = viewObject.getString("type");
-                boolean required;
+                boolean required = false;
                 if(viewObject.has("required")){
                     required = viewObject.getBoolean("required");
                 }
@@ -102,13 +105,17 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                         textInputEditText.setHint(fieldName);
                         textInputEditText.setImeOptions(EditorInfo.IME_ACTION_DONE);
                         textInputLayout.setBackground(ContextCompat.getDrawable(this,R.drawable.edge));
+                        textInputLayout.setHintTextAppearance(R.style.TextAppearance_AppCompat_Medium);
                         LinearLayout.LayoutParams textInputLayoutParams =  new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 //                        textInputLayoutParams.setMargins(0,10,0,10);
                         textInputEditText.setLayoutParams(textInputLayoutParams);
-                        //set Tag
+                        //set Tag to identify EditText
                         textInputEditText.setTag(fieldName + "et");
                         editTextTags.add(fieldName + "et");
+                        //to identify whether EditText field is required
+                        viewRequiredMap.put(fieldName+ "et",required);
                         textInputLayout.addView(textInputEditText);
+                        //set Tag to identify TextInputLayout to set error message
                         textInputLayout.setTag(fieldName + "il");
                         inputLayoutTags.add(fieldName + "il");
                         // add layout params
@@ -125,6 +132,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                         // Textview for label
                         TextView textView = new TextView(this);
                         textView.setText(fieldName);
+                        textView.setTextSize(18);
                         LinearLayout.LayoutParams textViewLayoutParams =  new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                         textViewLayoutParams.setMargins(10,10,10,10);
                         textView.setLayoutParams(textViewLayoutParams);
@@ -154,6 +162,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                         LinearLayout.LayoutParams multilineLayoutParams =  new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 350);
 //                        multilineLayoutParams.setMargins(0,10,0,10);
                         multiLineEditText.setLayoutParams(multilineLayoutParams);
+                        multiLineTextInputLayout.setHintTextAppearance(R.style.TextAppearance_AppCompat_Medium);
                         multiLineTextInputLayout.setBackground(ContextCompat.getDrawable(this,R.drawable.edge));
                         multiLineTextInputLayout.addView(multiLineEditText);
 
@@ -189,14 +198,16 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
 
     private void validateEditTexts() {
         for(int i=0;i<editTextTags.size();i++){
-            EditText editText = container.findViewWithTag(editTextTags.get(i));
+            TextInputEditText editText = container.findViewWithTag(editTextTags.get(i));
             String value = editText.getText().toString().trim();
-            if (value.equals("")) {
-                mErrorFlags |= FLAG_PIN_CODE;
-                TextInputLayout textInputLayout = container.findViewWithTag(inputLayoutTags.get(i));
-                textInputLayout.setError(getString(R.string.error_blank));
-            } else {
-                mErrorFlags &= ~FLAG_PIN_CODE;
+            if(viewRequiredMap.get(editTextTags.get(i))){
+                if (value.equals("")) {
+                    mErrorFlags |= FLAG_PIN_CODE;
+                    TextInputLayout textInputLayout = container.findViewWithTag(inputLayoutTags.get(i));
+                    textInputLayout.setError(getString(R.string.error_blank));
+                } else {
+                    mErrorFlags &= ~FLAG_PIN_CODE;
+                }
             }
         }
     }
