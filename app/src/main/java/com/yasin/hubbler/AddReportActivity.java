@@ -6,6 +6,9 @@ import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -76,13 +79,21 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
 
             for (int i = 0; i < viewArray.length(); i++) { // for-each not applicable to jsonArray
                 JSONObject viewObject = viewArray.getJSONObject(i);
-                String fieldName = viewObject.getString("field-name");
+                final String fieldName = viewObject.getString("field-name");
                 String type = viewObject.getString("type");
                 boolean required = false;
+                int min = -1;
+                int max = -1;
+                boolean hasOptions = false;
                 if(viewObject.has("required")){
                     required = viewObject.getBoolean("required");
                 }
-
+                if(viewObject.has("min")){
+                    min = viewObject.getInt("min");
+                }
+                if(viewObject.has("max")){
+                    max = viewObject.getInt("max");
+                }
                 LinearLayout.LayoutParams layoutParams =  new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 layoutParams.setMargins(50,10,50,10);
 
@@ -105,7 +116,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
 
                         //set Tags
                         if(required)
-                        editText.setTag("required");
+                            editText.setTag("required");
 
                         container.addView(textView);
                         container.addView(editText);
@@ -120,16 +131,50 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                         textViewNumberLayoutParams.setMargins(50,25,50,10);
                         textViewNUmber.setLayoutParams(textViewNumberLayoutParams);
 
-                        EditText editTextNUmber = new EditText(this);
+                        final EditText editTextNUmber = new EditText(this);
                         editTextNUmber.setHint(String.format("Type %s here.",fieldName));
                         editTextNUmber.setHintTextColor(ContextCompat.getColor(this,R.color.hint));
                         editTextNUmber.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                        editTextNUmber.setInputType(InputType.TYPE_CLASS_NUMBER);
                         editTextNUmber.setBackground(ContextCompat.getDrawable(this,android.R.color.transparent));
                         editTextNUmber.setLayoutParams(layoutParams);
 
                         //set Tags
                         if(required)
-                        editTextNUmber.setTag("required");
+                            editTextNUmber.setTag("required");
+                        if(min != -1 && max != -1 && max > min){
+                            final int minF = min;
+                            final int maxF = max;
+                            editTextNUmber.addTextChangedListener(new TextWatcher() {
+                                @Override
+                                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                                }
+
+                                @Override
+                                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                    final int a = !charSequence.toString().equals("")?Integer.parseInt(charSequence.toString()) : 0;
+                                    if(minF < a){
+                                        if(a < maxF){
+                                            editTextNUmber.setError(null);
+                                            valid = true;
+                                        }else {
+                                            editTextNUmber.setError(String.format("%s should be less than %s",fieldName,maxF));
+                                            valid = false;
+                                        }
+                                    }else {
+                                        editTextNUmber.setError(String.format("%s should be more than %s",fieldName,minF));
+                                        valid = false;
+                                    }
+                                }
+
+                                @Override
+                                public void afterTextChanged(Editable editable) {
+
+                                }
+                            });
+                        }
+
 
                         container.addView(textViewNUmber);
                         container.addView(editTextNUmber);
@@ -157,10 +202,13 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
 
                         //set Tags
                         if(required)
-                        editTextMultiline.setTag("required");
+                            editTextMultiline.setTag("required");
 
                         container.addView(textViewMultiline);
                         container.addView(editTextMultiline);
+                        break;
+
+                    case "dropdown":
                         break;
                 }
             }
