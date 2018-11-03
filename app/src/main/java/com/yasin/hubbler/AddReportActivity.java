@@ -14,10 +14,12 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +30,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,10 +88,12 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                 JSONObject viewObject = viewArray.getJSONObject(i);
                 final String fieldName = viewObject.getString("field-name");
                 String type = viewObject.getString("type");
+
                 boolean required = false;
                 int min = -1;
                 int max = -1;
-                boolean hasOptions = false;
+                ArrayList<String> options = null;
+
                 if(viewObject.has("required")){
                     required = viewObject.getBoolean("required");
                 }
@@ -98,18 +103,18 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                 if(viewObject.has("max")){
                     max = viewObject.getInt("max");
                 }
+                if(viewObject.has("options")){
+                    options = new ArrayList<>();
+                    for(int j = 0; j< viewObject.getJSONArray("options").length();j++){
+                        options.add(viewObject.getJSONArray("options").get(j).toString());
+                    }
+                }
                 LinearLayout.LayoutParams layoutParams =  new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 layoutParams.setMargins(50,10,50,10);
 
                 switch (type){
                     case "text":
-                        //Textview for Label
-                        TextView textView = new TextView(this);
-                        textView.setText(String.format("%s :", fieldName));
-                        textView.setTextSize(16);
-                        LinearLayout.LayoutParams textViewLayoutParams =  new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                        textViewLayoutParams.setMargins(50,25,50,10);
-                        textView.setLayoutParams(textViewLayoutParams);
+                        container.addView(createTextView(fieldName));
 
                         EditText editText = new EditText(this);
                         editText.setHint(String.format("Type %s here.",fieldName));
@@ -123,18 +128,11 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                         if(required)
                             editText.setTag("required");
 
-                        container.addView(textView);
                         container.addView(editText);
                         break;
 
                     case "number":
-                        //Textview for Label
-                        TextView textViewNUmber = new TextView(this);
-                        textViewNUmber.setText(String.format("%s :", fieldName));
-                        textViewNUmber.setTextSize(16);
-                        LinearLayout.LayoutParams textViewNumberLayoutParams =  new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                        textViewNumberLayoutParams.setMargins(50,25,50,10);
-                        textViewNUmber.setLayoutParams(textViewNumberLayoutParams);
+                        container.addView(createTextView(fieldName));
 
                         final EditText editTextNUmber = new EditText(this);
                         editTextNUmber.setHint(String.format("Type %s here.",fieldName));
@@ -180,19 +178,12 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                             });
                         }
 
-
-                        container.addView(textViewNUmber);
                         container.addView(editTextNUmber);
                         break;
 
                     case "multiline":
                         //Textview for Label
-                        TextView textViewMultiline = new TextView(this);
-                        textViewMultiline.setText(String.format("%s :", fieldName));
-                        textViewMultiline.setTextSize(16);
-                        LinearLayout.LayoutParams textViewMultilineLayoutParams =  new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                        textViewMultilineLayoutParams.setMargins(50,25,50,10);
-                        textViewMultiline.setLayoutParams(textViewMultilineLayoutParams);
+                        container.addView(createTextView(fieldName));
 
                         EditText editTextMultiline = new EditText(this);
                         editTextMultiline.setHint(String.format("Type %s here.",fieldName));
@@ -201,19 +192,30 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                         editTextMultiline.setSingleLine(false);
                         editTextMultiline.setImeOptions(EditorInfo.IME_FLAG_NO_ENTER_ACTION);
                         editTextMultiline.setBackground(ContextCompat.getDrawable(this,android.R.color.transparent));
-                        LinearLayout.LayoutParams editTextMultilineParams =  new LinearLayout.LayoutParams(300, 300);
-                        editTextMultilineParams.setMargins(50,10,50,10);
+                        editTextMultiline.setMinHeight(300);
                         editTextMultiline.setLayoutParams(layoutParams);
 
                         //set Tags
                         if(required)
                             editTextMultiline.setTag("required");
 
-                        container.addView(textViewMultiline);
                         container.addView(editTextMultiline);
                         break;
 
                     case "dropdown":
+                        if(options!= null){
+                            container.addView(createTextView(fieldName));
+
+                            Spinner spinner = new Spinner(this);
+                            LinearLayout.LayoutParams spinnerLayoutParams =  new LinearLayout.LayoutParams( ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                            spinnerLayoutParams.setMargins(50,25,50,10);
+                            spinner.setMinimumWidth(700);
+                            spinner.setLayoutParams(spinnerLayoutParams);
+                            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, options);
+                            spinner.setAdapter(adapter);
+
+                            container.addView(spinner);
+                        }
                         break;
                 }
             }
@@ -294,6 +296,17 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
 
     private void validateSpinner(){
 
+    }
+
+    private TextView createTextView(String fieldName){
+        LinearLayout.LayoutParams textViewLayoutParams =  new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        textViewLayoutParams.setMargins(50,25,50,10);
+
+        TextView textView = new TextView(this);
+        textView.setText(String.format("%s :", fieldName));
+        textView.setTextSize(16);
+        textView.setLayoutParams(textViewLayoutParams);
+        return textView;
     }
 
     @Override
