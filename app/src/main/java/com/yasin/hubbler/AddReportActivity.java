@@ -233,10 +233,8 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
             String viewClass = container.getChildAt(i).getClass().getName();
             if (viewClass.contains("EditText")) {
                 EditText et = (EditText) container.getChildAt(i);
-                if (!et.getText().toString().trim().isEmpty()) {
-                    outState.putString(String.valueOf(counter),et.getText().toString());
-                    counter++;
-                }
+                outState.putString(String.valueOf(counter),et.getText().toString());
+                counter++;
             }
         }
     }
