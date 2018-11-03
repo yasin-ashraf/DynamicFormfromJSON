@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,6 +44,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
     private Map<String,Boolean> viewRequiredMap = new HashMap<>();
     private FrameLayout buttonDone;
     private Boolean valid = false;
+    private ImageView backButton;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,8 +52,10 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         setContentView(R.layout.activity_add_report);
         container = findViewById(R.id.container);
         buttonDone = findViewById(R.id.button_done);
+        backButton = findViewById(R.id.iv_button_back);
 
         buttonDone.setOnClickListener(this);
+        backButton.setOnClickListener(this);
         readJsonFile();
     }
 
@@ -111,6 +115,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                         editText.setHint(String.format("Type %s here.",fieldName));
                         editText.setHintTextColor(ContextCompat.getColor(this,R.color.hint));
                         editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                        editText.setSingleLine(true);
                         editText.setBackground(ContextCompat.getDrawable(this,android.R.color.transparent));
                         editText.setLayoutParams(layoutParams);
 
@@ -219,12 +224,46 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        int counter = 0;
+        for (int i = 0; i < container.getChildCount(); i++) {
+            String viewClass = container.getChildAt(i).getClass().getName();
+            if (viewClass.contains("EditText")) {
+                EditText et = (EditText) container.getChildAt(i);
+                if (!et.getText().toString().trim().isEmpty()) {
+                    outState.putString(String.valueOf(counter),et.getText().toString());
+                    counter++;
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        int counter = 0;
+        for (int i = 0; i < container.getChildCount(); i++) {
+            String viewClass = container.getChildAt(i).getClass().getName();
+            if (viewClass.contains("EditText")) {
+                EditText et = (EditText) container.getChildAt(i);
+                et.setText(savedInstanceState.getString(String.valueOf(counter)));
+                counter++;
+            }
+        }
+    }
+
+    @Override
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.button_done:
                 if(ensureValidated()){
                     Toast.makeText(this, "Report Added", Toast.LENGTH_SHORT).show();
                 }
+                break;
+
+            case R.id.iv_button_back:
+                finish();
                 break;
         }
     }
@@ -237,10 +276,10 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
 
     private void validateEditTexts() {
         for (int i = 0; i < container.getChildCount(); i++) {
-            if (container.getChildAt(i).getTag() != null && container.getChildAt(i).getTag().toString().contains("required")) {
-                String viewClass = container.getChildAt(i).getClass().getName();
-                if (viewClass.contains("EditText")) {
-                    EditText et = (EditText) container.getChildAt(i);
+            String viewClass = container.getChildAt(i).getClass().getName();
+            if (viewClass.contains("EditText")) {
+                EditText et = (EditText) container.getChildAt(i);
+                if (et.getTag() != null && et.getTag().toString().contains("required")) {
                     if (et.getText().toString().trim().isEmpty()) {
                         et.setError("This field is required.");
                         valid =false;

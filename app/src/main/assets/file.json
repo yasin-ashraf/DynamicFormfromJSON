@@ -2,9 +2,11 @@
 
 {"field-name":"name", "type":"text", "required":true},
 
-{"field-name":"age", "type":"number", "min":18, "max":65},
+{"field-name":"age", "type":"number"},
 
 {"field-name":"address", "type":"multiline", "required":true},
+
+{"field-name":"Current Position", "type":"text", "required":true},
 
 {"field-name":"gender", "type":"dropdown", "options":["male", "female", "other"]}
 
