@@ -3,7 +3,7 @@ Assignment done by me as part of recruitment process at hubbler.mobi
 
 Recruitment process managed and overseen by Renjith Chaz, CTO Hubbler
 
-# Problem (as received from Renjith Chaz via mail)
+# Problem
 
 There will be two screens in this assignment. 
 
@@ -105,3 +105,4 @@ Notes:
 
 # Solution
 
+To be updated soon.
