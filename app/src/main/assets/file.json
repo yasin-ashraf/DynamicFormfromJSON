@@ -4,6 +4,6 @@
 
 {"field-name":"age", "type":"number", "min":18, "max":65},
 
-{"field-name":"address", "type":"multiline", "required":false}
+{"field-name":"address", "type":"multiline", "required":true}
 
 ]
