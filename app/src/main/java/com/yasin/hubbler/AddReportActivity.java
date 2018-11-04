@@ -2,8 +2,6 @@ package com.yasin.hubbler;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -14,6 +12,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -30,24 +29,17 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by im_yasinashraf started on 1/11/18.
  */
 public class AddReportActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private String jsonData;
     private LinearLayout container;
-    private List<String> editTextTags = new ArrayList<>();
-    private List<String> inputLayoutTags = new ArrayList<>();
-    private Map<String,Boolean> viewRequiredMap = new HashMap<>();
     private FrameLayout buttonDone;
     private Boolean valid = false;
     private ImageView backButton;
+    private JSONObject reportObject;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,6 +48,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         container = findViewById(R.id.container);
         buttonDone = findViewById(R.id.button_done);
         backButton = findViewById(R.id.iv_button_back);
+        reportObject = new JSONObject();
 
         buttonDone.setOnClickListener(this);
         backButton.setOnClickListener(this);
@@ -69,7 +62,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
             byte[] buffer = new byte[size];
             inputStream.read(buffer);
             inputStream.close();
-            jsonData = new String(buffer, "UTF-8");
+            String jsonData = new String(buffer, "UTF-8");
 
             parseJsonData(jsonData);
 
@@ -79,7 +72,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
-    private void parseJsonData(String jsonData){ // do in different thread
+    private void parseJsonData(String jsonData) { // do in different thread
 
         try {
             JSONArray viewArray = new JSONArray(jsonData);
@@ -94,39 +87,64 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                 int max = -1;
                 ArrayList<String> options = null;
 
-                if(viewObject.has("required")){
+                if (viewObject.has("required")) {
                     required = viewObject.getBoolean("required");
                 }
-                if(viewObject.has("min")){
+                if (viewObject.has("min")) {
                     min = viewObject.getInt("min");
                 }
-                if(viewObject.has("max")){
+                if (viewObject.has("max")) {
                     max = viewObject.getInt("max");
                 }
-                if(viewObject.has("options")){
+                if (viewObject.has("options")) {
                     options = new ArrayList<>();
-                    for(int j = 0; j< viewObject.getJSONArray("options").length();j++){
+                    for (int j = 0; j < viewObject.getJSONArray("options").length(); j++) {
                         options.add(viewObject.getJSONArray("options").get(j).toString());
                     }
                 }
-                LinearLayout.LayoutParams layoutParams =  new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                layoutParams.setMargins(50,10,50,10);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                layoutParams.setMargins(50, 10, 50, 10);
 
-                switch (type){
+                switch (type) {
                     case "text":
                         container.addView(createTextView(fieldName));
 
                         EditText editText = new EditText(this);
-                        editText.setHint(String.format("Type %s here.",fieldName));
-                        editText.setHintTextColor(ContextCompat.getColor(this,R.color.hint));
+                        editText.setHint(String.format("Type %s here.", fieldName));
+                        editText.setHintTextColor(ContextCompat.getColor(this, R.color.hint));
                         editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
                         editText.setSingleLine(true);
-                        editText.setBackground(ContextCompat.getDrawable(this,android.R.color.transparent));
+                        editText.setBackground(ContextCompat.getDrawable(this, android.R.color.transparent));
                         editText.setLayoutParams(layoutParams);
 
                         //set Tags
-                        if(required)
+                        if (required)
                             editText.setTag("required");
+
+                        editText.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                            }
+
+                            @Override
+                            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                Hubbler.getApp(AddReportActivity.this).getExecutor().execute(()->{
+                                    try {
+                                        reportObject.put(fieldName, charSequence.toString());
+                                        Log.e("REPORTOBJECT",reportObject.toString());
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable editable) {
+
+                            }
+                        });
+
 
                         container.addView(editText);
                         break;
@@ -135,48 +153,60 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                         container.addView(createTextView(fieldName));
 
                         final EditText editTextNUmber = new EditText(this);
-                        editTextNUmber.setHint(String.format("Type %s here.",fieldName));
-                        editTextNUmber.setHintTextColor(ContextCompat.getColor(this,R.color.hint));
+                        editTextNUmber.setHint(String.format("Type %s here.", fieldName));
+                        editTextNUmber.setHintTextColor(ContextCompat.getColor(this, R.color.hint));
                         editTextNUmber.setImeOptions(EditorInfo.IME_ACTION_DONE);
                         editTextNUmber.setInputType(InputType.TYPE_CLASS_NUMBER);
-                        editTextNUmber.setBackground(ContextCompat.getDrawable(this,android.R.color.transparent));
+                        editTextNUmber.setBackground(ContextCompat.getDrawable(this, android.R.color.transparent));
                         editTextNUmber.setLayoutParams(layoutParams);
 
                         //set Tags
-                        if(required)
+                        if (required)
                             editTextNUmber.setTag("required");
-                        if(min != -1 && max != -1 && max > min){
-                            final int minF = min;
-                            final int maxF = max;
-                            editTextNUmber.addTextChangedListener(new TextWatcher() {
-                                @Override
-                                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-                                }
+                        final int minF = min;
+                        final int maxF = max;
+                        editTextNUmber.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-                                @Override
-                                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                                    final int a = !charSequence.toString().equals("")?Integer.parseInt(charSequence.toString()) : 0;
-                                    if(minF < a){
-                                        if(a < maxF){
+                            }
+
+                            @Override
+                            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                if (minF != -1 || maxF != -1 && maxF > minF) {
+                                    final int a = !charSequence.toString().equals("") ? Integer.parseInt(charSequence.toString()) : 0;
+                                    if (minF < a) {
+                                        if (a < maxF) {
                                             editTextNUmber.setError(null);
                                             valid = true;
-                                        }else {
-                                            editTextNUmber.setError(String.format("%s should be less than %s",fieldName,maxF));
+                                        } else {
+                                            editTextNUmber.setError(String.format("%s should be less than %s", fieldName, maxF));
                                             valid = false;
                                         }
-                                    }else {
-                                        editTextNUmber.setError(String.format("%s should be more than %s",fieldName,minF));
+                                    } else {
+                                        editTextNUmber.setError(String.format("%s should be more than %s", fieldName, minF));
                                         valid = false;
                                     }
+                                } else {
+                                    valid = true;
+                                    Hubbler.getApp(AddReportActivity.this).getExecutor().execute(()->{
+                                        try {
+                                            reportObject.put(fieldName, editTextNUmber.getText().toString());
+                                            Log.e("REPORTOBJECT",reportObject.toString());
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    });
                                 }
+                            }
 
-                                @Override
-                                public void afterTextChanged(Editable editable) {
+                            @Override
+                            public void afterTextChanged(Editable editable) {
 
-                                }
-                            });
-                        }
+                            }
+                        });
+
 
                         container.addView(editTextNUmber);
                         break;
@@ -186,34 +216,82 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                         container.addView(createTextView(fieldName));
 
                         EditText editTextMultiline = new EditText(this);
-                        editTextMultiline.setHint(String.format("Type %s here.",fieldName));
-                        editTextMultiline.setHintTextColor(ContextCompat.getColor(this,R.color.hint));
+                        editTextMultiline.setHint(String.format("Type %s here.", fieldName));
+                        editTextMultiline.setHintTextColor(ContextCompat.getColor(this, R.color.hint));
                         editTextMultiline.setGravity(Gravity.TOP);
                         editTextMultiline.setSingleLine(false);
                         editTextMultiline.setImeOptions(EditorInfo.IME_FLAG_NO_ENTER_ACTION);
-                        editTextMultiline.setBackground(ContextCompat.getDrawable(this,android.R.color.transparent));
+                        editTextMultiline.setBackground(ContextCompat.getDrawable(this, android.R.color.transparent));
                         editTextMultiline.setMinHeight(300);
                         editTextMultiline.setLayoutParams(layoutParams);
 
                         //set Tags
-                        if(required)
+                        if (required)
                             editTextMultiline.setTag("required");
+
+                        editTextMultiline.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                            }
+
+                            @Override
+                            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                Hubbler.getApp(AddReportActivity.this).getExecutor().execute(() ->{
+                                    try {
+                                        reportObject.put(fieldName, charSequence.toString());
+                                        Log.e("REPORTOBJECT",reportObject.toString());
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable editable) {
+
+                            }
+                        });
 
                         container.addView(editTextMultiline);
                         break;
 
                     case "dropdown":
-                        if(options!= null){
+                        if (options != null) {
                             container.addView(createTextView(fieldName));
 
                             Spinner spinner = new Spinner(this);
-                            LinearLayout.LayoutParams spinnerLayoutParams =  new LinearLayout.LayoutParams( ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                            spinnerLayoutParams.setMargins(50,25,50,10);
+                            LinearLayout.LayoutParams spinnerLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                            spinnerLayoutParams.setMargins(50, 25, 50, 10);
                             spinner.setMinimumWidth(700);
                             spinner.setLayoutParams(spinnerLayoutParams);
                             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, options);
                             spinner.setAdapter(adapter);
 
+                            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                @Override
+                                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                    Hubbler.getApp(AddReportActivity.this).getExecutor().execute(() ->{
+                                        try {
+                                            reportObject.put(fieldName,adapterView.getSelectedItem().toString());
+                                            Log.e("REPORTOBJECT",reportObject.toString());
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void onNothingSelected(AdapterView<?> adapterView) {
+                                    Hubbler.getApp(AddReportActivity.this).getExecutor().execute(() ->{
+                                        try {
+                                            reportObject.put(fieldName,adapterView.getItemAtPosition(0).toString());
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    });
+                                }
+                            });
                             container.addView(spinner);
                         }
                         break;
@@ -233,7 +311,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
             String viewClass = container.getChildAt(i).getClass().getName();
             if (viewClass.contains("EditText")) {
                 EditText et = (EditText) container.getChildAt(i);
-                outState.putString(String.valueOf(counter),et.getText().toString());
+                outState.putString(String.valueOf(counter), et.getText().toString());
                 counter++;
             }
         }
@@ -255,10 +333,17 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.button_done:
-                if(ensureValidated()){
+                if (ensureValidated()) {
+                    HubblerDatabase hubblerDatabase = HubblerDatabase.getInMemoryDatabase(Hubbler.getApp(this));
+                    Hubbler.getApp(this).getExecutor().execute(()->{
+                        Report report = new Report();
+                        report.setReport(reportObject.toString());
+                        hubblerDatabase.reportDao().save(report);
+                    });
                     Toast.makeText(this, "Report Added", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
                 break;
 
@@ -270,7 +355,6 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
 
     private boolean ensureValidated() {
         validateEditTexts();
-        //validateSpinner();
         return valid;
     }
 
@@ -282,8 +366,8 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                 if (et.getTag() != null && et.getTag().toString().contains("required")) {
                     if (et.getText().toString().trim().isEmpty()) {
                         et.setError("This field is required.");
-                        valid =false;
-                    }else {
+                        valid = false;
+                    } else {
                         et.setError(null);
                         valid = true;
                     }
@@ -292,13 +376,9 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
-    private void validateSpinner(){
-
-    }
-
-    private TextView createTextView(String fieldName){
-        LinearLayout.LayoutParams textViewLayoutParams =  new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        textViewLayoutParams.setMargins(50,25,50,10);
+    private TextView createTextView(String fieldName) {
+        LinearLayout.LayoutParams textViewLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        textViewLayoutParams.setMargins(50, 25, 50, 10);
 
         TextView textView = new TextView(this);
         textView.setText(String.format("%s :", fieldName));

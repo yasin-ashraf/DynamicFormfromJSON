@@ -6,10 +6,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.List;
+
 /**
  * Created by im_yasinashraf started on 30/10/18.
  */
 public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportsViewHolder> {
+
+    private List<Report> reports;
+
+    public ReportsAdapter(List<Report> reports) {
+        this.reports = reports;
+    }
 
     @NonNull
     @Override
@@ -25,7 +33,7 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportsV
 
     @Override
     public int getItemCount() {
-        return 0;
+        return reports.size();
     }
 
     class ReportsViewHolder extends RecyclerView.ViewHolder {
