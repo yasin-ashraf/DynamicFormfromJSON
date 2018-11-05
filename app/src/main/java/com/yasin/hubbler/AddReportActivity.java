@@ -302,6 +302,54 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                             container.addView(spinner);
                         }
                         break;
+
+                    case "email":
+                        container.addView(createTextView(fieldName));
+
+                        final EditText editTextEmail = new EditText(this);
+                        editTextEmail.setHint(String.format("Type %s here.", fieldName));
+                        editTextEmail.setHintTextColor(ContextCompat.getColor(this, R.color.hint));
+                        editTextEmail.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                        editTextEmail.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+                        editTextEmail.setBackground(ContextCompat.getDrawable(this, android.R.color.transparent));
+                        editTextEmail.setLayoutParams(layoutParams);
+
+                        //set required tag
+                        if (required)
+                            editTextEmail.setTag("required");
+                        editTextEmail.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                            }
+
+                            @Override
+                            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                String regex = "^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
+                                if((!editTextEmail.getText().toString().equals("") && editTextEmail.getText().toString().matches(regex))){
+                                    Hubbler.getApp(AddReportActivity.this).getExecutor().execute(() ->{
+                                        try {
+                                            reportObject.put(fieldName, charSequence.toString());
+                                            Log.e("REPORTOBJECT",reportObject.toString());
+                                            valid = true;
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    });
+                                }else {
+                                    editTextEmail.setError("Please type a valid email.");
+                                    valid = false;
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable editable) {
+
+                            }
+                        });
+
+                        container.addView(editTextEmail);
+                        break;
                 }
             }
 
