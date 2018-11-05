@@ -46,11 +46,13 @@ public class ReportsActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void setReports(){
-        HubblerDatabase hubblerDatabase = HubblerDatabase.getInMemoryDatabase(Hubbler.getApp(this));
         Hubbler.getApp(this).getExecutor().execute(()->{
-            reports = hubblerDatabase.reportDao().load();
+            reports = DatabaseClient.getInstance(getApplicationContext()).getAppDatabase().reportDao().load();
             if(reports.size() == 0){
-                emptyReports.setVisibility(View.VISIBLE);
+                this.runOnUiThread(() ->{
+                    emptyReports.setVisibility(View.VISIBLE);
+                });
+
             }else {
                 this.runOnUiThread(() -> {
                     ReportsAdapter reportsAdapter = new ReportsAdapter(reports);

@@ -17,6 +17,7 @@ public class Hubbler extends Application {
     public void onCreate() {
         super.onCreate();
         executor = Executors.newSingleThreadExecutor();
+//        new DatabaseClient(getApplicationContext());
     }
 
     public static Hubbler getApp(Activity activity) {

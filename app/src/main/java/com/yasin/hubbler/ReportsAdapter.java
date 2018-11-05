@@ -15,7 +15,7 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportsV
 
     private List<Report> reports;
 
-    public ReportsAdapter(List<Report> reports) {
+    ReportsAdapter(List<Report> reports) {
         this.reports = reports;
     }
 

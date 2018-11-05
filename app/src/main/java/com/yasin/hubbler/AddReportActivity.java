@@ -336,14 +336,16 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         switch (view.getId()) {
             case R.id.button_done:
                 if (ensureValidated()) {
-                    HubblerDatabase hubblerDatabase = HubblerDatabase.getInMemoryDatabase(Hubbler.getApp(this));
-                    Hubbler.getApp(this).getExecutor().execute(()->{
-                        Report report = new Report();
-                        report.setReport(reportObject.toString());
-                        hubblerDatabase.reportDao().save(report);
+                    /*Hubbler.getApp(this).getExecutor().execute(()->{
+
+                    });*/
+                    Report report = new Report();
+                    report.setReport(reportObject.toString());
+                    DatabaseClient.getInstance(getApplicationContext()).getAppDatabase().reportDao().save(report);
+                    this.runOnUiThread(()->{
+                        Toast.makeText(this, "Report Added", Toast.LENGTH_SHORT).show();
+                        finish();
                     });
-                    Toast.makeText(this, "Report Added", Toast.LENGTH_SHORT).show();
-                    finish();
                 }
                 break;
 
