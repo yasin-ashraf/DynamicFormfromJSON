@@ -1,8 +1,10 @@
-package com.yasin.hubbler;
+package com.yasin.hubbler.Database;
 
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+
+import com.yasin.hubbler.Model.Report;
 
 import java.util.List;
 

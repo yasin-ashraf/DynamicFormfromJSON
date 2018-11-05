@@ -1,8 +1,10 @@
-package com.yasin.hubbler;
+package com.yasin.hubbler.Database;
 
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.TypeConverters;
+
+import com.yasin.hubbler.Model.Report;
 
 /**
  * Created by im_yasinashraf started on 4/11/18.

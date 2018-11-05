@@ -3,6 +3,8 @@ package com.yasin.hubbler;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 
+import com.yasin.hubbler.Database.HubblerDatabase;
+
 /**
  * Created by im_yasinashraf started on 5/11/18.
  */
@@ -12,10 +14,9 @@ public class DatabaseClient {
     private Context context;
     private static DatabaseClient mInstance;
 
-    //our app database object
     private HubblerDatabase hubblerDatabase;
 
-    public DatabaseClient(Context context) {
+    private DatabaseClient(Context context) {
         this.context = context;
         //creating the app database with Room database builder
         hubblerDatabase = Room.databaseBuilder(context,

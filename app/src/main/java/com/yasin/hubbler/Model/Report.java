@@ -1,8 +1,10 @@
-package com.yasin.hubbler;
+package com.yasin.hubbler.Model;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.TypeConverters;
+
+import com.yasin.hubbler.Database.DateConverter;
 
 import java.util.Date;
 

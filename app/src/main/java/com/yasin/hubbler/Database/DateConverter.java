@@ -1,4 +1,4 @@
-package com.yasin.hubbler;
+package com.yasin.hubbler.Database;
 
 import android.arch.persistence.room.TypeConverter;
 

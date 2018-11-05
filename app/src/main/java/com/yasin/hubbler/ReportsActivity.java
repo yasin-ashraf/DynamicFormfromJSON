@@ -13,6 +13,9 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.yasin.hubbler.Adapter.ReportsAdapter;
+import com.yasin.hubbler.Model.Report;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

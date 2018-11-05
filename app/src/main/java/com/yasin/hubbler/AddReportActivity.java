@@ -22,6 +22,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.yasin.hubbler.Model.Report;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -337,17 +339,13 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         switch (view.getId()) {
             case R.id.button_done:
                 if (ensureValidated()) {
-                    /*Hubbler.getApp(this).getExecutor().execute(()->{
-
-                    });*/
+                    //Adding report to db causes unknown issue while adding it from different thread. Hence moving it back to main thread.
                     Report report = new Report();
                     report.setReport(reportObject.toString());
                     report.setAddedTime(new Date());
                     DatabaseClient.getInstance(getApplicationContext()).getAppDatabase().reportDao().save(report);
-                    this.runOnUiThread(()->{
-                        Toast.makeText(this, "Report Added", Toast.LENGTH_SHORT).show();
-                        finish();
-                    });
+                    Toast.makeText(this, "Report Added", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
                 break;
 
