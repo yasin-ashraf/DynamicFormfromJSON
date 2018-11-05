@@ -6,6 +6,7 @@ import java.util.Date;
 
 /**
  * Created by im_yasinashraf started on 24/5/18.
+ * Converter class for Date Objects.(Room Database)
  */
 public class DateConverter {
 

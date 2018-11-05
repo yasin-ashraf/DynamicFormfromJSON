@@ -25,7 +25,7 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportsV
     private List<Report> reports;
     private List<String> fields;
 
-    ReportsAdapter(List<Report> reports, List<String> fields) {
+    public ReportsAdapter(List<Report> reports, List<String> fields) {
         this.reports = reports;
         this.fields = fields;
 

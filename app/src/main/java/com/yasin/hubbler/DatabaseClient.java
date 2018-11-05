@@ -9,19 +9,17 @@ import com.yasin.hubbler.Database.HubblerDatabase;
  * Created by im_yasinashraf started on 5/11/18.
  */
 
-public class DatabaseClient {
+class DatabaseClient {
 
-    private Context context;
     private static DatabaseClient mInstance;
 
     private HubblerDatabase hubblerDatabase;
 
     private DatabaseClient(Context context) {
-        this.context = context;
         //creating the app database with Room database builder
         hubblerDatabase = Room.databaseBuilder(context,
                 HubblerDatabase.class, "HubblerDatabase.db")
-                .allowMainThreadQueries()
+                .allowMainThreadQueries() // Can't be done ina large production env.
                 .build();
     }
 

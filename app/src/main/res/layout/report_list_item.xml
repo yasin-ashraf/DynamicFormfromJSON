@@ -27,8 +27,7 @@
             android:layout_gravity="center"
             android:fontFamily="@font/product_sans_bold"
             android:textColor="#ffffff"
-            android:textSize="16sp"
-            android:text="M"/>
+            android:textSize="16sp" />
     </FrameLayout>
 
     <LinearLayout
@@ -46,8 +45,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/product_sans_regular"
             android:textColor="@color/colorPrimaryDark"
-            android:textSize="16sp"
-            android:text="Maverick Vinales" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/tv_property_identifier_2"
@@ -56,8 +54,7 @@
             android:layout_marginTop="4dp"
             android:fontFamily="@font/product_sans_regular"
             android:textColor="@color/colorPrimaryDark"
-            android:textSize="12sp"
-            android:text="9656896523" />
+            android:textSize="12sp" />
 
     </LinearLayout>
 
@@ -71,8 +68,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginEnd="8dp"
-        android:text="10 min ago" />
+        android:layout_marginEnd="8dp" />
 
 
 

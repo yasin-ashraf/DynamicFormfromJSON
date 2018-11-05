@@ -75,8 +75,12 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
-    private void parseJsonData(String jsonData) { // do in different thread
-
+    /**
+     * Parse JSON file and create views accordingly.Set tag 'required' on views required.
+     * Validate min and max on Text Change.
+     * Add field values to report JSON Object on text change for EditText and on ItemSelected for Spinner.
+     */
+    private void parseJsonData(String jsonData) {
         try {
             JSONArray viewArray = new JSONArray(jsonData);
 
@@ -120,7 +124,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                         editText.setBackground(ContextCompat.getDrawable(this, android.R.color.transparent));
                         editText.setLayoutParams(layoutParams);
 
-                        //set Tags
+                        //set required tag
                         if (required)
                             editText.setTag("required");
 
@@ -163,7 +167,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                         editTextNUmber.setBackground(ContextCompat.getDrawable(this, android.R.color.transparent));
                         editTextNUmber.setLayoutParams(layoutParams);
 
-                        //set Tags
+                        //set required tag
                         if (required)
                             editTextNUmber.setTag("required");
 
@@ -228,7 +232,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                         editTextMultiline.setMinHeight(300);
                         editTextMultiline.setLayoutParams(layoutParams);
 
-                        //set Tags
+                        //set required tag
                         if (required)
                             editTextMultiline.setTag("required");
 
@@ -306,6 +310,10 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
+    /**
+     * to preserve the state on screen rotation.
+     * EditText fields reinstated with a counter.
+     */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -360,6 +368,9 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         return valid;
     }
 
+    /**
+     * Checking if the required fields are empty.
+     */
     private void validateEditTexts() {
         for (int i = 0; i < container.getChildCount(); i++) {
             String viewClass = container.getChildAt(i).getClass().getName();

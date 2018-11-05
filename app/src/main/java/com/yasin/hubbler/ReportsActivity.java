@@ -57,26 +57,27 @@ public class ReportsActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void setReports(){
-
-        Hubbler.getApp(this).getExecutor().execute(()->{
+        Hubbler.getApp(this).getExecutor().execute(()->{  // get report data from DB, different thread execution
             reports = DatabaseClient.getInstance(getApplicationContext()).getAppDatabase().reportDao().load();
             if(reports.size() == 0){
-                this.runOnUiThread(() ->{
+                this.runOnUiThread(() ->{ //switch back to UI thread for switching view
                     emptyReports.setVisibility(View.VISIBLE);
                 });
 
             }else {
-                this.runOnUiThread(() -> {
+                this.runOnUiThread(() -> {//switch back to UI thread for switching view
                     ReportsAdapter reportsAdapter = new ReportsAdapter(reports,readJsonFileToGetFields());
                     rvReports.setAdapter(reportsAdapter);
                     emptyReports.setVisibility(View.GONE);
-                    reportsCount.setText(String.valueOf(reports.size()));
+                    reportsCount.setText(String.valueOf(reports.size())); // set count of NUmber of Reports.
                 });
-
             }
         });
     }
 
+    /**
+     * read Fields from JSON file (Assets/file.json), Stored as ArrayList to preserve the order.
+     */
     private List<String> readJsonFileToGetFields() {
         List<String> fields = new ArrayList<>();
         try {
@@ -98,8 +99,6 @@ public class ReportsActivity extends AppCompatActivity implements View.OnClickLi
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-            Log.e("data", jsonData);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
