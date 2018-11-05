@@ -2,6 +2,9 @@ package com.yasin.hubbler;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.TypeConverters;
+
+import java.util.Date;
 
 /**
  * Created by im_yasinashraf started on 3/11/18.
@@ -13,6 +16,9 @@ public class Report {
     private int Id;
 
     private String report;
+
+    @TypeConverters(DateConverter.class)
+    private Date addedTime;
 
     public String getReport() {
         return report;
@@ -28,5 +34,13 @@ public class Report {
 
     public void setId(int id) {
         Id = id;
+    }
+
+    public Date getAddedTime() {
+        return addedTime;
+    }
+
+    public void setAddedTime(Date addedTime) {
+        this.addedTime = addedTime;
     }
 }

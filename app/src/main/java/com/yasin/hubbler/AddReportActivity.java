@@ -29,6 +29,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by im_yasinashraf started on 1/11/18.
@@ -341,6 +342,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                     });*/
                     Report report = new Report();
                     report.setReport(reportObject.toString());
+                    report.setAddedTime(new Date());
                     DatabaseClient.getInstance(getApplicationContext()).getAppDatabase().reportDao().save(report);
                     this.runOnUiThread(()->{
                         Toast.makeText(this, "Report Added", Toast.LENGTH_SHORT).show();

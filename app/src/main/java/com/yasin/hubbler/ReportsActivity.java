@@ -7,11 +7,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,6 +54,7 @@ public class ReportsActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void setReports(){
+
         Hubbler.getApp(this).getExecutor().execute(()->{
             reports = DatabaseClient.getInstance(getApplicationContext()).getAppDatabase().reportDao().load();
             if(reports.size() == 0){
@@ -55,7 +64,7 @@ public class ReportsActivity extends AppCompatActivity implements View.OnClickLi
 
             }else {
                 this.runOnUiThread(() -> {
-                    ReportsAdapter reportsAdapter = new ReportsAdapter(reports);
+                    ReportsAdapter reportsAdapter = new ReportsAdapter(reports,readJsonFileToGetFields());
                     rvReports.setAdapter(reportsAdapter);
                     emptyReports.setVisibility(View.GONE);
                     reportsCount.setText(String.valueOf(reports.size()));
@@ -64,6 +73,36 @@ public class ReportsActivity extends AppCompatActivity implements View.OnClickLi
             }
         });
     }
+
+    private List<String> readJsonFileToGetFields() {
+        List<String> fields = new ArrayList<>();
+        try {
+            InputStream inputStream = this.getAssets().open("file.json");
+            int size = inputStream.available();
+            byte[] buffer = new byte[size];
+            inputStream.read(buffer);
+            inputStream.close();
+            String jsonData = new String(buffer, "UTF-8");
+
+            JSONArray viewArray = null;
+            try {
+                viewArray = new JSONArray(jsonData);
+                for (int i = 0; i < viewArray.length(); i++) { // for-each not applicable to jsonArray
+                    JSONObject viewObject = viewArray.getJSONObject(i);
+                    final String fieldName = viewObject.getString("field-name");
+                    fields.add(fieldName);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            Log.e("data", jsonData);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return fields;
+    }
+
 
     @Override
     public void onClick(View view) {
