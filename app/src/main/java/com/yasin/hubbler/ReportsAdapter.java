@@ -1,6 +1,5 @@
 package com.yasin.hubbler;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -46,6 +45,7 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportsV
                 reportsViewHolder.identifierTwo.setText(String.format("%s : %s",fields.get(1),reportObject.get(fields.get(1))));
             }
             reportsViewHolder.addedTime.setText(String.format("%s min ago",getTimeInterval(report.getAddedTime())));
+            reportsViewHolder.firstLetter.setText(String.valueOf(reportObject.get(fields.get(0)).toString().charAt(0)));
         } catch (JSONException e) {
             e.printStackTrace();
         }
