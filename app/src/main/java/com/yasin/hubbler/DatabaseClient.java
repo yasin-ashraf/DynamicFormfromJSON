@@ -19,7 +19,6 @@ class DatabaseClient {
         //creating the app database with Room database builder
         hubblerDatabase = Room.databaseBuilder(context,
                 HubblerDatabase.class, "HubblerDatabase.db")
-                .allowMainThreadQueries() // Can't be done ina large production env.
                 .build();
     }
 
