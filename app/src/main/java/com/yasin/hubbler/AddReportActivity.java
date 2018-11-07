@@ -395,11 +395,13 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         switch (view.getId()) {
             case R.id.button_done:
                 if (ensureValidated()) {
-                    //Adding report to db causes unknown issue while adding it from different thread. Hence moving it back to main thread.
-                    Report report = new Report();
-                    report.setReport(reportObject.toString());
-                    report.setAddedTime(new Date());
-                    DatabaseClient.getInstance(getApplicationContext()).getAppDatabase().reportDao().save(report);
+                    Hubbler.getApp(this).getExecutor().execute(()->{
+                        Report report = new Report();
+                        report.setReport(reportObject.toString());
+                        report.setAddedTime(new Date());
+                        DatabaseClient.getInstance(getApplicationContext()).getAppDatabase().reportDao().save(report);
+                    });
+
                     Toast.makeText(this, "Report Added", Toast.LENGTH_SHORT).show();
                     finish();
                 }

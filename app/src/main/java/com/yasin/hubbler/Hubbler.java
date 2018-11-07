@@ -16,7 +16,7 @@ public class Hubbler extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        executor = Executors.newSingleThreadExecutor();
+        executor = Executors.newCachedThreadPool();
     }
 
     public static Hubbler getApp(Activity activity) {
