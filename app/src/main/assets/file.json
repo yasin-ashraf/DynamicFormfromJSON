@@ -4,7 +4,7 @@
 
 {"field-name":"email", "type":"email", "required":true},
 
-{"field-name":"age", "type":"number"},
+{"field-name":"age", "type":"number", "min":"22", "max":"30"},
 
 {"field-name":"address", "type":"multiline", "required":true},
 

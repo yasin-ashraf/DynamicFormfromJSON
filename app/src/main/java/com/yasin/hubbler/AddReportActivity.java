@@ -23,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.yasin.hubbler.Model.Report;
+import com.yasin.hubbler.Validators.EmailValidator;
+import com.yasin.hubbler.Validators.NumberValidator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,19 +45,27 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
     private Boolean valid = false;
     private ImageView backButton;
     private JSONObject reportObject;
+    private EmailValidator emailValidator;
+    private NumberValidator numberValidator;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_report);
+        init();
+        readJsonFile();
+    }
+
+    private void init(){
         container = findViewById(R.id.container);
         buttonDone = findViewById(R.id.button_done);
         backButton = findViewById(R.id.iv_button_back);
         reportObject = new JSONObject();
+        emailValidator = new EmailValidator();
+        numberValidator = new NumberValidator();
 
         buttonDone.setOnClickListener(this);
         backButton.setOnClickListener(this);
-        readJsonFile();
     }
 
     private void readJsonFile() {
@@ -86,273 +96,30 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
 
             for (int i = 0; i < viewArray.length(); i++) { // for-each not applicable to jsonArray
                 JSONObject viewObject = viewArray.getJSONObject(i);
-                final String fieldName = viewObject.getString("field-name");
-                String type = viewObject.getString("type");
+                final String fieldName = viewObject.getString(getString(R.string.label_field_name));
+                String type = viewObject.getString(getString(R.string.label_type));
 
                 boolean required = false;
-                int min = -1;
-                int max = -1;
+                int min = -1,max = -1;
                 ArrayList<String> options = null;
-
-                if (viewObject.has("required")) {
-                    required = viewObject.getBoolean("required");
-                }
-                if (viewObject.has("min")) {
-                    min = viewObject.getInt("min");
-                }
-                if (viewObject.has("max")) {
-                    max = viewObject.getInt("max");
-                }
-                if (viewObject.has("options")) {
+                if (viewObject.has(getString(R.string.label_required))) required = viewObject.getBoolean(getString(R.string.label_required));
+                if (viewObject.has(getString(R.string.label_min))) min = viewObject.getInt(getString(R.string.label_min));
+                if (viewObject.has(getString(R.string.label_max))) max = viewObject.getInt(getString(R.string.label_max));
+                if (viewObject.has(getString(R.string.label_options))) {
                     options = new ArrayList<>();
-                    for (int j = 0; j < viewObject.getJSONArray("options").length(); j++) {
-                        options.add(viewObject.getJSONArray("options").get(j).toString());
+                    for (int j = 0; j < viewObject.getJSONArray(getString(R.string.label_options)).length(); j++) {
+                        options.add(viewObject.getJSONArray(getString(R.string.label_options)).get(j).toString());
                     }
                 }
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                layoutParams.setMargins(50, 10, 50, 10);
-
-                switch (type) {
-                    case "text":
-                        container.addView(createTextView(fieldName));
-
-                        EditText editText = new EditText(this);
-                        editText.setHint(String.format("Type %s here.", fieldName));
-                        editText.setHintTextColor(ContextCompat.getColor(this, R.color.hint));
-                        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
-                        editText.setSingleLine(true);
-                        editText.setBackground(ContextCompat.getDrawable(this, android.R.color.transparent));
-                        editText.setLayoutParams(layoutParams);
-
-                        //set required tag
-                        if (required)
-                            editText.setTag("required");
-
-                        editText.addTextChangedListener(new TextWatcher() {
-                            @Override
-                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                            }
-
-                            @Override
-                            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                                Hubbler.getApp(AddReportActivity.this).getExecutor().execute(()->{
-                                    try {
-                                        reportObject.put(fieldName, charSequence.toString());
-                                        Log.e("REPORTOBJECT",reportObject.toString());
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void afterTextChanged(Editable editable) {
-
-                            }
-                        });
-
-
-                        container.addView(editText);
-                        break;
-
-                    case "number":
-                        container.addView(createTextView(fieldName));
-
-                        final EditText editTextNUmber = new EditText(this);
-                        editTextNUmber.setHint(String.format("Type %s here.", fieldName));
-                        editTextNUmber.setHintTextColor(ContextCompat.getColor(this, R.color.hint));
-                        editTextNUmber.setImeOptions(EditorInfo.IME_ACTION_DONE);
-                        editTextNUmber.setInputType(InputType.TYPE_CLASS_NUMBER);
-                        editTextNUmber.setBackground(ContextCompat.getDrawable(this, android.R.color.transparent));
-                        editTextNUmber.setLayoutParams(layoutParams);
-
-                        //set required tag
-                        if (required)
-                            editTextNUmber.setTag("required");
-
-                        final int minF = min;
-                        final int maxF = max;
-                        editTextNUmber.addTextChangedListener(new TextWatcher() {
-                            @Override
-                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                            }
-
-                            @Override
-                            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                                if (minF != -1 || maxF != -1 && maxF > minF) {
-                                    final int a = !charSequence.toString().equals("") ? Integer.parseInt(charSequence.toString()) : 0;
-                                    if (minF < a) {
-                                        if (a < maxF) {
-                                            editTextNUmber.setError(null);
-                                            valid = true;
-                                        } else {
-                                            editTextNUmber.setError(String.format("%s should be less than %s", fieldName, maxF));
-                                            valid = false;
-                                        }
-                                    } else {
-                                        editTextNUmber.setError(String.format("%s should be more than %s", fieldName, minF));
-                                        valid = false;
-                                    }
-                                } else {
-                                    valid = true;
-                                    Hubbler.getApp(AddReportActivity.this).getExecutor().execute(()->{
-                                        try {
-                                            reportObject.put(fieldName, editTextNUmber.getText().toString());
-                                            Log.e("REPORTOBJECT",reportObject.toString());
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                    });
-                                }
-                            }
-
-                            @Override
-                            public void afterTextChanged(Editable editable) {
-
-                            }
-                        });
-
-
-                        container.addView(editTextNUmber);
-                        break;
-
-                    case "multiline":
-                        //Textview for Label
-                        container.addView(createTextView(fieldName));
-
-                        EditText editTextMultiline = new EditText(this);
-                        editTextMultiline.setHint(String.format("Type %s here.", fieldName));
-                        editTextMultiline.setHintTextColor(ContextCompat.getColor(this, R.color.hint));
-                        editTextMultiline.setGravity(Gravity.TOP);
-                        editTextMultiline.setSingleLine(false);
-                        editTextMultiline.setImeOptions(EditorInfo.IME_FLAG_NO_ENTER_ACTION);
-                        editTextMultiline.setBackground(ContextCompat.getDrawable(this, android.R.color.transparent));
-                        editTextMultiline.setMinHeight(300);
-                        editTextMultiline.setLayoutParams(layoutParams);
-
-                        //set required tag
-                        if (required)
-                            editTextMultiline.setTag("required");
-
-                        editTextMultiline.addTextChangedListener(new TextWatcher() {
-                            @Override
-                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                            }
-
-                            @Override
-                            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                                Hubbler.getApp(AddReportActivity.this).getExecutor().execute(() ->{
-                                    try {
-                                        reportObject.put(fieldName, charSequence.toString());
-                                        Log.e("REPORTOBJECT",reportObject.toString());
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void afterTextChanged(Editable editable) {
-
-                            }
-                        });
-
-                        container.addView(editTextMultiline);
-                        break;
-
-                    case "dropdown":
-                        if (options != null) {
-                            container.addView(createTextView(fieldName));
-
-                            Spinner spinner = new Spinner(this);
-                            LinearLayout.LayoutParams spinnerLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                            spinnerLayoutParams.setMargins(50, 25, 50, 10);
-                            spinner.setMinimumWidth(700);
-                            spinner.setLayoutParams(spinnerLayoutParams);
-                            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, options);
-                            spinner.setAdapter(adapter);
-
-                            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                                @Override
-                                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                    Hubbler.getApp(AddReportActivity.this).getExecutor().execute(() ->{
-                                        try {
-                                            reportObject.put(fieldName,adapterView.getSelectedItem().toString());
-                                            Log.e("REPORTOBJECT",reportObject.toString());
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                    });
-                                }
-
-                                @Override
-                                public void onNothingSelected(AdapterView<?> adapterView) {
-                                    Hubbler.getApp(AddReportActivity.this).getExecutor().execute(() ->{
-                                        try {
-                                            reportObject.put(fieldName,adapterView.getItemAtPosition(0).toString());
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                    });
-                                }
-                            });
-                            container.addView(spinner);
-                        }
-                        break;
-
-                    case "email":
-                        container.addView(createTextView(fieldName));
-
-                        final EditText editTextEmail = new EditText(this);
-                        editTextEmail.setHint(String.format("Type %s here.", fieldName));
-                        editTextEmail.setHintTextColor(ContextCompat.getColor(this, R.color.hint));
-                        editTextEmail.setImeOptions(EditorInfo.IME_ACTION_DONE);
-                        editTextEmail.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-                        editTextEmail.setBackground(ContextCompat.getDrawable(this, android.R.color.transparent));
-                        editTextEmail.setLayoutParams(layoutParams);
-
-                        //set required tag
-                        if (required)
-                            editTextEmail.setTag("required");
-                        editTextEmail.addTextChangedListener(new TextWatcher() {
-                            @Override
-                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                            }
-
-                            @Override
-                            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                                String regex = "^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
-                                if((!editTextEmail.getText().toString().equals("") && editTextEmail.getText().toString().matches(regex))){
-                                    Hubbler.getApp(AddReportActivity.this).getExecutor().execute(() ->{
-                                        try {
-                                            reportObject.put(fieldName, charSequence.toString());
-                                            Log.e("REPORTOBJECT",reportObject.toString());
-                                            valid = true;
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                    });
-                                }else {
-                                    editTextEmail.setError("Please type a valid email.");
-                                    valid = false;
-                                }
-                            }
-
-                            @Override
-                            public void afterTextChanged(Editable editable) {
-
-                            }
-                        });
-
-                        container.addView(editTextEmail);
-                        break;
+                container.addView(createTextView(fieldName));
+                if(type.equals(getString(R.string.label_dropdown))){
+                    if (options != null) {
+                        container.addView(createSpinner(fieldName,options));
+                    }
+                }else {
+                    container.addView(createEditText(type,fieldName,required,min,max));
                 }
             }
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -402,7 +169,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                         DatabaseClient.getInstance(getApplicationContext()).getAppDatabase().reportDao().save(report);
                     });
 
-                    Toast.makeText(this, "Report Added", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.label_report_added, Toast.LENGTH_SHORT).show();
                     finish();
                 }
                 break;
@@ -426,9 +193,9 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
             String viewClass = container.getChildAt(i).getClass().getName();
             if (viewClass.contains("EditText")) {
                 EditText et = (EditText) container.getChildAt(i);
-                if (et.getTag() != null && et.getTag().toString().contains("required")) {
+                if (et.getTag() != null && et.getTag().toString().contains(getString(R.string.label_required))) {
                     if (et.getText().toString().trim().isEmpty()) {
-                        et.setError("This field is required.");
+                        et.setError(getString(R.string.label_is_required));
                         valid = false;
                     } else {
                         et.setError(null);
@@ -440,14 +207,118 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
     }
 
     private TextView createTextView(String fieldName) {
-        LinearLayout.LayoutParams textViewLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        textViewLayoutParams.setMargins(50, 25, 50, 10);
-
         TextView textView = new TextView(this);
         textView.setText(String.format("%s :", fieldName));
         textView.setTextSize(16);
-        textView.setLayoutParams(textViewLayoutParams);
+        textView.setLayoutParams(getGeneralLayoutParams());
         return textView;
+    }
+
+    private EditText createEditText(String type, String fieldName, Boolean required,int min,int max){
+        EditText editText = new EditText(this);
+        editText.setHint(String.format(getString(R.string.label_type_here), fieldName));
+        editText.setHintTextColor(ContextCompat.getColor(this, R.color.hint));
+        editText.setBackground(ContextCompat.getDrawable(this, android.R.color.transparent));
+        if(type.equals(getString(R.string.label_multiline))){
+            editText.setGravity(Gravity.TOP);
+            editText.setSingleLine(false);
+            editText.setImeOptions(EditorInfo.IME_FLAG_NO_ENTER_ACTION);
+            editText.setMinHeight(300);
+        }else {
+            editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+            editText.setSingleLine(true);
+        }
+        if(type.equals(getString(R.string.label_email))){
+            editText.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        }else if(type.equals(getString(R.string.label_number))){
+            editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+        }
+        editText.setLayoutParams(getEditFieldLayoutParams());
+        if (required) editText.setTag(getString(R.string.label_required));//set required tag
+        addTextChangedListener(editText,type,min,max);
+        return editText;
+    }
+
+    private Spinner createSpinner(String fieldName,ArrayList<String> options) {
+        Spinner spinner = new Spinner(this);
+        spinner.setMinimumWidth(700);
+        spinner.setLayoutParams(getGeneralLayoutParams());
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, options);
+        spinner.setAdapter(adapter);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                try {
+                    reportObject.put(fieldName,adapterView.getSelectedItem().toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                try {
+                    reportObject.put(fieldName,adapterView.getItemAtPosition(0).toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        return spinner;
+    }
+
+    private void addTextChangedListener(EditText editText,String type,int min,int max){
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                switch (type){
+                    case "email":
+                        if(emailValidator.isValid(editText.getText().toString())){
+                            editText.setError(null);
+                            valid = true;
+                        }else {
+                            editText.setError(getString(R.string.label_valid_email));
+                            valid = false;
+                        }
+                        break;
+
+                    case "number":
+                        if (min != -1 || max != -1 && max > min) {
+                            if(numberValidator.isValid(charSequence,min,max)){
+                                editText.setError(null);
+                                valid = true;
+                            }else {
+                                editText.setError(String.format(getString(R.string.label_should_be_between),min,max));
+                                valid = false;
+                            }
+                        } else {
+                            valid = true;
+                        }
+                        break;
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
+    }
+
+    private LinearLayout.LayoutParams getGeneralLayoutParams(){
+        LinearLayout.LayoutParams generalLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        generalLayoutParams.setMargins(50, 25, 50, 10);
+        return generalLayoutParams;
+    }
+
+    private LinearLayout.LayoutParams getEditFieldLayoutParams(){
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.setMargins(50, 10, 50, 10);
+        return layoutParams;
     }
 
     @Override

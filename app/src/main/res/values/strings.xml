@@ -7,4 +7,19 @@
     <string name="label_add_a_report">Add a Report</string>
     <string name="error_blank">this field is required.</string>
     <string name="label_valid_email">Please type a valid email!</string>
+    <string name="label_type_here">Type %s here.</string>
+    <string name="label_is_required">This field is required.</string>
+    <string name="label_should_be_between">Should be between %d and %d</string>
+    <string name="label_type_valid_email">Please type a valid email.</string>
+    <string name="label_report_added">Report Added</string>
+    <string name="label_field_name">field-name</string>
+    <string name="label_type">type</string>
+    <string name="label_required">required</string>
+    <string name="label_min">min</string>
+    <string name="label_max">max</string>
+    <string name="label_options">options</string>
+    <string name="label_dropdown">dropdown</string>
+    <string name="label_multiline">multiline</string>
+    <string name="label_email">email</string>
+    <string name="label_number">number</string>
 </resources>
