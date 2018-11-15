@@ -12,8 +12,8 @@ public class NumberValidator {
 
     public boolean isValid(@NonNull CharSequence text,int min,int max) {
         final int a = !text.toString().equals("") ? Integer.parseInt(text.toString()) : 0;
-        if (min < a) {
-            valid = a < max;
+        if (min <= a) {
+            valid = a <= max;
         } else {
             valid = false;
         }

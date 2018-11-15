@@ -111,17 +111,21 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                         options.add(viewObject.getJSONArray(getString(R.string.label_options)).get(j).toString());
                     }
                 }
-                container.addView(createTextView(fieldName));
-                if(type.equals(getString(R.string.label_dropdown))){
-                    if (options != null) {
-                        container.addView(createSpinner(fieldName,options));
-                    }
-                }else {
-                    container.addView(createEditText(type,fieldName,required,min,max));
-                }
+                generateViews(type,fieldName,options,required,min,max);
             }
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void generateViews(String type,String fieldName,ArrayList<String> options,Boolean required,int min,int max){
+        container.addView(createTextView(fieldName));
+        if(type.equals(getString(R.string.label_dropdown))){
+            if (options != null) {
+                container.addView(createSpinner(fieldName,options));
+            }
+        }else {
+            container.addView(createEditText(type,fieldName,required,min,max));
         }
     }
 
@@ -162,13 +166,9 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         switch (view.getId()) {
             case R.id.button_done:
                 if (ensureValidated()) {
-                    Hubbler.getApp(this).getExecutor().execute(()->{
-                        Report report = new Report();
-                        report.setReport(reportObject.toString());
-                        report.setAddedTime(new Date());
-                        DatabaseClient.getInstance(getApplicationContext()).getAppDatabase().reportDao().save(report);
-                    });
-
+                    createReportObject();
+                    saveReport();
+                    Log.e("REPORT ONJECT",reportObject.toString());
                     Toast.makeText(this, R.string.label_report_added, Toast.LENGTH_SHORT).show();
                     finish();
                 }
@@ -178,6 +178,39 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                 finish();
                 break;
         }
+    }
+
+    private void saveReport(){
+        Hubbler.getApp(this).getExecutor().execute(()->{
+            Report report = new Report();
+            report.setReport(reportObject.toString());
+            report.setAddedTime(new Date());
+            DatabaseClient.getInstance(getApplicationContext()).getAppDatabase().reportDao().save(report);
+        });
+    }
+
+    private void createReportObject() {
+        for (int i = 0; i < container.getChildCount(); i++) {
+            String viewClass = container.getChildAt(i).getClass().getName();
+            if (viewClass.contains("EditText")) {
+                EditText et = (EditText) container.getChildAt(i);
+                if (et.getTag() != null && et.getTag().toString().contains(getString(R.string.label_required))) {
+                    String[] data = et.getTag().toString().split(";");
+                    try {
+                        reportObject.put(data[1],et.getText().toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }else {
+                    try {
+                        reportObject.put(et.getTag().toString(),et.getText().toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
     }
 
     private boolean ensureValidated() {
@@ -234,7 +267,8 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
             editText.setInputType(InputType.TYPE_CLASS_NUMBER);
         }
         editText.setLayoutParams(getEditFieldLayoutParams());
-        if (required) editText.setTag(getString(R.string.label_required));//set required tag
+        if (required) editText.setTag(getString(R.string.label_required) + ";" + fieldName);
+        else editText.setTag(fieldName);//set required tag
         addTextChangedListener(editText,type,min,max);
         return editText;
     }
