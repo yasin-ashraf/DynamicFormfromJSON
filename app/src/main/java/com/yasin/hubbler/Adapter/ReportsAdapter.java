@@ -30,6 +30,7 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportsV
     private List<Report> reports;
     private List<String> fields;
     private Context context;
+    private String dayTime;
 
     public ReportsAdapter(List<Report> reports, List<String> fields,Context context) {
         this.reports = reports;
@@ -53,7 +54,7 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportsV
             if(fields.size() > 1){
                 reportsViewHolder.identifierTwo.setText(String.format("%s : %s",fields.get(1),reportObject.get(fields.get(1))));
             }
-            reportsViewHolder.addedTime.setText(String.format("%s min ago",getTimeInterval(report.getAddedTime())));
+            reportsViewHolder.addedTime.setText(String.format("%s %s ago",getTimeInterval(report.getAddedTime()),dayTime));
             reportsViewHolder.firstLetter.setText(String.valueOf(reportObject.get(fields.get(0)).toString().charAt(0)));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -75,6 +76,15 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportsV
     private Long getTimeInterval(Date addedDate){
         Date currentDate = new Date();
         long duration  = currentDate.getTime() - addedDate.getTime();
+        if(TimeUnit.MILLISECONDS.toMinutes(duration) > 60){
+            if(TimeUnit.MILLISECONDS.toHours(duration) > 24){
+                dayTime = "day";
+                return TimeUnit.MILLISECONDS.toDays(duration);
+            }
+            dayTime = "hr";
+            return TimeUnit.MILLISECONDS.toHours(duration);
+        }
+        dayTime = "min";
         return TimeUnit.MILLISECONDS.toMinutes(duration);
     }
 
