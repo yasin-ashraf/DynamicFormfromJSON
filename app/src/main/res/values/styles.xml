@@ -8,8 +8,32 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="errorText" parent="Widget.Design.TextInputLayout">
+    <style name="ToolbarTheme" parent="@style/ThemeOverlay.AppCompat.ActionBar">
+        <item name="colorControlNormal">@color/white</item>
+    </style>
 
+    <!--CollapsingToolbar-->
+    <style name="collapsedText" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">@font/product_sans_bold</item>
+    </style>
+    <style name="ExpandedText" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">@font/product_sans_bold</item>
+    </style>
+
+    <style name="textStyle">
+        <item name="android:fontFamily">@font/product_sans_regular</item>
+    </style>
+
+    <style name="hintStyle">
+        <item name="android:fontFamily">@font/product_sans_regular</item>
+    </style>
+
+    <style name="boldStyle">
+        <item name="android:fontFamily">@font/product_sans_bold</item>
     </style>
 
 </resources>

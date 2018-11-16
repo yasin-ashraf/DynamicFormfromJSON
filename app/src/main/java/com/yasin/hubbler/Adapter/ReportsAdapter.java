@@ -1,6 +1,10 @@
 package com.yasin.hubbler.Adapter;
 
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +13,7 @@ import android.widget.TextView;
 
 import com.yasin.hubbler.Model.Report;
 import com.yasin.hubbler.R;
+import com.yasin.hubbler.ViewReportActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,11 +29,12 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportsV
 
     private List<Report> reports;
     private List<String> fields;
+    private Context context;
 
-    public ReportsAdapter(List<Report> reports, List<String> fields) {
+    public ReportsAdapter(List<Report> reports, List<String> fields,Context context) {
         this.reports = reports;
         this.fields = fields;
-
+        this.context = context;
     }
 
     @NonNull
@@ -52,6 +58,13 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportsV
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        reportsViewHolder.itemView.setOnClickListener(view ->{
+            Intent intent = new Intent(context,ViewReportActivity.class);
+            intent.putExtra("id",report.getId());
+            intent.putExtra("json",report.getReport());
+            context.startActivity(intent);
+        });
     }
 
     @Override

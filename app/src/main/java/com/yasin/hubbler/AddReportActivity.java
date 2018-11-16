@@ -129,57 +129,6 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
-    /**
-     * to preserve the state on screen rotation.
-     * EditText fields reinstated with a counter.
-     */
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        int counter = 0;
-        for (int i = 0; i < container.getChildCount(); i++) {
-            String viewClass = container.getChildAt(i).getClass().getName();
-            if (viewClass.contains("EditText")) {
-                EditText et = (EditText) container.getChildAt(i);
-                outState.putString(String.valueOf(counter), et.getText().toString());
-                counter++;
-            }
-        }
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        int counter = 0;
-        for (int i = 0; i < container.getChildCount(); i++) {
-            String viewClass = container.getChildAt(i).getClass().getName();
-            if (viewClass.contains("EditText")) {
-                EditText et = (EditText) container.getChildAt(i);
-                et.setText(savedInstanceState.getString(String.valueOf(counter)));
-                counter++;
-            }
-        }
-    }
-
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.button_done:
-                if (ensureValidated()) {
-                    createReportObject();
-                    saveReport();
-                    Log.e("REPORT ONJECT",reportObject.toString());
-                    Toast.makeText(this, R.string.label_report_added, Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-                break;
-
-            case R.id.iv_button_back:
-                finish();
-                break;
-        }
-    }
-
     private void saveReport(){
         Hubbler.getApp(this).getExecutor().execute(()->{
             Report report = new Report();
@@ -353,6 +302,57 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutParams.setMargins(50, 10, 50, 10);
         return layoutParams;
+    }
+
+    /**
+     * to preserve the state on screen rotation.
+     * EditText fields reinstated with a counter.
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        int counter = 0;
+        for (int i = 0; i < container.getChildCount(); i++) {
+            String viewClass = container.getChildAt(i).getClass().getName();
+            if (viewClass.contains("EditText")) {
+                EditText et = (EditText) container.getChildAt(i);
+                outState.putString(String.valueOf(counter), et.getText().toString());
+                counter++;
+            }
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        int counter = 0;
+        for (int i = 0; i < container.getChildCount(); i++) {
+            String viewClass = container.getChildAt(i).getClass().getName();
+            if (viewClass.contains("EditText")) {
+                EditText et = (EditText) container.getChildAt(i);
+                et.setText(savedInstanceState.getString(String.valueOf(counter)));
+                counter++;
+            }
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.button_done:
+                if (ensureValidated()) {
+                    createReportObject();
+                    saveReport();
+                    Log.e("REPORT ONJECT",reportObject.toString());
+                    Toast.makeText(this, R.string.label_report_added, Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                break;
+
+            case R.id.iv_button_back:
+                finish();
+                break;
+        }
     }
 
     @Override

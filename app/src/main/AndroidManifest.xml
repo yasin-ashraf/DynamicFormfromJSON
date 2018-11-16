@@ -37,6 +37,9 @@
         <activity android:name=".AddReportActivity"
             android:windowSoftInputMode="stateHidden">
         </activity>
+        <activity android:name=".ViewReportActivity"
+            android:parentActivityName=".ReportsActivity">
+        </activity>
     </application>
 
 </manifest>
