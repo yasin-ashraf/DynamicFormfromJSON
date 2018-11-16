@@ -1,4 +1,4 @@
-package com.yasin.hubbler;
+package com.yasin.hubbler.Fragment;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -12,10 +12,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.yasin.hubbler.R;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Created by im_yasinashraf started on 16/11/18.
@@ -28,18 +31,22 @@ public class ViewReportFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_view_report, container, false);
-        containerView = view.findViewById(R.id.container);
-        String report = getArguments().getString("json");
+        initViews(view);
+        String report = Objects.requireNonNull(getArguments()).getString("json");
         ArrayList<String> fields = getArguments().getStringArrayList("fields");
-        createViews(report,fields);
+        createViews(report,Objects.requireNonNull(fields));
         return view;
+    }
+
+    private void initViews(View view){
+        containerView = view.findViewById(R.id.container);
     }
 
     private void createViews(String report, ArrayList<String> fields) {
         try {
             JSONObject reportObject = new JSONObject(report);
             for (int i = 0; i < fields.size(); i++) {
-                containerView.addView(createTextView(fields.get(i),reportObject.getString(fields.get(i))));
+                containerView.addView(createFields(fields.get(i),reportObject.getString(fields.get(i))));
                 containerView.addView(createDividerView());
             }
         } catch (JSONException e) {
@@ -47,14 +54,14 @@ public class ViewReportFragment extends Fragment {
         }
     }
 
-    private RelativeLayout createTextView(String fieldName, String field) {
+    private RelativeLayout createFields(String fieldName, String field) {
         RelativeLayout relativeLayout = new RelativeLayout(getActivity());
         relativeLayout.setLayoutParams(getGeneralLayoutParams());
         TextView[] textView = new TextView[2];
         textView[0] = new TextView(getActivity()); //first TextView for Field Name
         textView[0].setId(R.id.textViewId);
         textView[0].setTextSize(16);
-        textView[0].setTextAppearance(getActivity(),R.style.hintStyle);
+        textView[0].setTextAppearance(getActivity(),R.style.regularStyle);
         textView[0].setText(fieldName);
         relativeLayout.addView(textView[0],getTextViewLayoutParams());
         textView[1] = new TextView(getActivity()); //second TextView for Field

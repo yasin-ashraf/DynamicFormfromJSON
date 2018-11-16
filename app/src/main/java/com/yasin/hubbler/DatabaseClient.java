@@ -9,7 +9,7 @@ import com.yasin.hubbler.Database.HubblerDatabase;
  * Created by im_yasinashraf started on 5/11/18.
  */
 
-class DatabaseClient {
+public class DatabaseClient {
 
     private static DatabaseClient mInstance;
 
@@ -22,14 +22,14 @@ class DatabaseClient {
                 .build();
     }
 
-    static synchronized DatabaseClient getInstance(Context context) {
+    public static synchronized DatabaseClient getInstance(Context context) {
         if (mInstance == null) {
             mInstance = new DatabaseClient(context);
         }
         return mInstance;
     }
 
-    HubblerDatabase getAppDatabase() {
+    public HubblerDatabase getAppDatabase() {
         return hubblerDatabase;
     }
 }

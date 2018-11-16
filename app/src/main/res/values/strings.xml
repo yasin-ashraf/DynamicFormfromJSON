@@ -22,4 +22,5 @@
     <string name="label_multiline">multiline</string>
     <string name="label_email">email</string>
     <string name="label_number">number</string>
+    <string name="label_update">Update</string>
 </resources>

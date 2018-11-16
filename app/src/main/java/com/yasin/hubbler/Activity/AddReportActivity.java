@@ -1,19 +1,14 @@
-package com.yasin.hubbler;
+package com.yasin.hubbler.Activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -22,9 +17,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.yasin.hubbler.DatabaseClient;
+import com.yasin.hubbler.Hubbler;
 import com.yasin.hubbler.Model.Report;
+import com.yasin.hubbler.R;
 import com.yasin.hubbler.Validators.EmailValidator;
 import com.yasin.hubbler.Validators.NumberValidator;
+import com.yasin.hubbler.ViewGenerators.EditTextGenerator;
+import com.yasin.hubbler.ViewGenerators.SpinnerGenerator;
+import com.yasin.hubbler.ViewGenerators.TextViewGenerator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,6 +48,9 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
     private JSONObject reportObject;
     private EmailValidator emailValidator;
     private NumberValidator numberValidator;
+    private EditTextGenerator editTextGenerator;
+    private TextViewGenerator textViewGenerator;
+    private SpinnerGenerator spinnerGenerator;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,6 +67,9 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         reportObject = new JSONObject();
         emailValidator = new EmailValidator();
         numberValidator = new NumberValidator();
+        editTextGenerator = new EditTextGenerator(this);
+        textViewGenerator = new TextViewGenerator(this);
+        spinnerGenerator = new SpinnerGenerator(this);
 
         buttonDone.setOnClickListener(this);
         backButton.setOnClickListener(this);
@@ -86,9 +93,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
     }
 
     /**
-     * Parse JSON file and create views accordingly.Set tag 'required' on views required.
-     * Validate min and max on Text Change.
-     * Add field values to report JSON Object on text change for EditText and on ItemSelected for Spinner.
+     * Parse JSON file and create views accordingly.
      */
     private void parseJsonData(String jsonData) {
         try {
@@ -118,7 +123,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
-    private void generateViews(String type,String fieldName,ArrayList<String> options,Boolean required,int min,int max){
+    private void generateViews(String type,String fieldName,ArrayList<String> options,Boolean required,int min,int max){// too much parameters??
         container.addView(createTextView(fieldName));
         if(type.equals(getString(R.string.label_dropdown))){
             if (options != null) {
@@ -159,7 +164,6 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                 }
             }
         }
-
     }
 
     private boolean ensureValidated() {
@@ -189,46 +193,18 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
     }
 
     private TextView createTextView(String fieldName) {
-        TextView textView = new TextView(this);
-        textView.setText(String.format("%s :", fieldName));
-        textView.setTextSize(16);
-        textView.setLayoutParams(getGeneralLayoutParams());
-        return textView;
+        return textViewGenerator.generateTextView(fieldName);
     }
 
-    private EditText createEditText(String type, String fieldName, Boolean required,int min,int max){
-        EditText editText = new EditText(this);
-        editText.setHint(String.format(getString(R.string.label_type_here), fieldName));
-        editText.setHintTextColor(ContextCompat.getColor(this, R.color.hint));
-        editText.setBackground(ContextCompat.getDrawable(this, android.R.color.transparent));
-        if(type.equals(getString(R.string.label_multiline))){
-            editText.setGravity(Gravity.TOP);
-            editText.setSingleLine(false);
-            editText.setImeOptions(EditorInfo.IME_FLAG_NO_ENTER_ACTION);
-            editText.setMinHeight(300);
-        }else {
-            editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
-            editText.setSingleLine(true);
-        }
-        if(type.equals(getString(R.string.label_email))){
-            editText.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-        }else if(type.equals(getString(R.string.label_number))){
-            editText.setInputType(InputType.TYPE_CLASS_NUMBER);
-        }
-        editText.setLayoutParams(getEditFieldLayoutParams());
-        if (required) editText.setTag(getString(R.string.label_required) + ";" + fieldName);
-        else editText.setTag(fieldName);//set required tag
+    private EditText createEditText(String type, String fieldName, Boolean required,int min,int max){// too much parameters??
+        EditText editText = editTextGenerator.generateEditText(type, fieldName, required, min, max);
         addTextChangedListener(editText,type,min,max);
         return editText;
     }
 
+    //TODO: SRE - Create specific classes to generate views, do at the end.
     private Spinner createSpinner(String fieldName,ArrayList<String> options) {
-        Spinner spinner = new Spinner(this);
-        spinner.setMinimumWidth(700);
-        spinner.setLayoutParams(getGeneralLayoutParams());
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, options);
-        spinner.setAdapter(adapter);
-
+        Spinner spinner = spinnerGenerator.generateSpinner(options);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -298,12 +274,6 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         return generalLayoutParams;
     }
 
-    private LinearLayout.LayoutParams getEditFieldLayoutParams(){
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins(50, 10, 50, 10);
-        return layoutParams;
-    }
-
     /**
      * to preserve the state on screen rotation.
      * EditText fields reinstated with a counter.
@@ -343,7 +313,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                 if (ensureValidated()) {
                     createReportObject();
                     saveReport();
-                    Log.e("REPORT ONJECT",reportObject.toString());
+                    Log.e("REPORT OBJECT",reportObject.toString());
                     Toast.makeText(this, R.string.label_report_added, Toast.LENGTH_SHORT).show();
                     finish();
                 }

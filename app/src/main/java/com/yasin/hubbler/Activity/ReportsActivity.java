@@ -1,4 +1,4 @@
-package com.yasin.hubbler;
+package com.yasin.hubbler.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +13,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.yasin.hubbler.Adapter.ReportsAdapter;
+import com.yasin.hubbler.DatabaseClient;
+import com.yasin.hubbler.Hubbler;
 import com.yasin.hubbler.Model.Report;
+import com.yasin.hubbler.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;

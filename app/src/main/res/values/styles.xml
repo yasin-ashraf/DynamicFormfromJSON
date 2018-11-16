@@ -28,7 +28,7 @@
         <item name="android:fontFamily">@font/product_sans_regular</item>
     </style>
 
-    <style name="hintStyle">
+    <style name="regularStyle">
         <item name="android:fontFamily">@font/product_sans_regular</item>
     </style>
 
