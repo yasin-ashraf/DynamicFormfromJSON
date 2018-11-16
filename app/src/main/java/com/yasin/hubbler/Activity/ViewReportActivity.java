@@ -58,12 +58,19 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
         editButton.setOnClickListener(this);
     }
 
+    public void setReport(String report) {
+        this.report = report;
+    }
+
+    public String getReport() {
+        return report;
+    }
+
     /**
      * Add ViewReport fragment to container to show the fields.
      */
     private void showFields(){
         Bundle args = new Bundle();
-        args.putString("json",report);
         args.putStringArrayList("fields",fields);
         ViewReportFragment reportFragment = new ViewReportFragment();
         reportFragment.setArguments(args);
@@ -79,7 +86,6 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
     private void showEditFields(){
         Bundle args = new Bundle();
         args.putInt("id",id);
-        args.putString("json",report);
         EditReportFragment editReportFragment = new EditReportFragment();
         editReportFragment.setArguments(args);
         getSupportFragmentManager().beginTransaction()

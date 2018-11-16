@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.yasin.hubbler.Activity.ViewReportActivity;
 import com.yasin.hubbler.R;
 
 import org.json.JSONException;
@@ -32,8 +33,8 @@ public class ViewReportFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_view_report, container, false);
         initViews(view);
-        String report = Objects.requireNonNull(getArguments()).getString("json");
-        ArrayList<String> fields = getArguments().getStringArrayList("fields");
+        String report = ((ViewReportActivity)Objects.requireNonNull(getActivity())).getReport();
+        ArrayList<String> fields = Objects.requireNonNull(getArguments()).getStringArrayList("fields");
         createViews(report,Objects.requireNonNull(fields));
         return view;
     }

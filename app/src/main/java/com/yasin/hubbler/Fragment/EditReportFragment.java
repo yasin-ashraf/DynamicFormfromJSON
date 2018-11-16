@@ -17,6 +17,10 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.yasin.hubbler.Activity.ViewReportActivity;
+import com.yasin.hubbler.DatabaseClient;
+import com.yasin.hubbler.Hubbler;
+import com.yasin.hubbler.Model.Report;
 import com.yasin.hubbler.R;
 import com.yasin.hubbler.Validators.EmailValidator;
 import com.yasin.hubbler.Validators.NumberValidator;
@@ -31,6 +35,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -47,11 +52,13 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
     private FrameLayout updateButton;
     private JSONObject reportObject;
     private Boolean valid = false;
+    private Integer id;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String report = Objects.requireNonNull(getArguments()).getString("json");
+        String report = ((ViewReportActivity)Objects.requireNonNull(getActivity())).getReport();
+        id = Objects.requireNonNull(getArguments()).getInt("id");
         initReportObject(report);
         emailValidator = new EmailValidator();
         numberValidator = new NumberValidator();
@@ -222,10 +229,75 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
         });
     }
 
+    /**
+     * Checking if the required fields are empty.
+     */
+    private void validateEditTexts() {
+        for (int i = 0; i < containerView.getChildCount(); i++) {
+            String viewClass = containerView.getChildAt(i).getClass().getName();
+            if (viewClass.contains("EditText")) {
+                EditText et = (EditText) containerView.getChildAt(i);
+                if (et.getTag() != null && et.getTag().toString().contains(getString(R.string.label_required))) {
+                    if (et.getText().toString().trim().isEmpty()) {
+                        et.setError(getString(R.string.label_is_required));
+                        valid = false;
+                    } else {
+                        et.setError(null);
+                        valid = true;
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean ensureValidated() {
+        validateEditTexts();
+        return valid;
+    }
+
+    private void createReportObject() {
+        for (int i = 0; i < containerView.getChildCount(); i++) {
+            String viewClass = containerView.getChildAt(i).getClass().getName();
+            if (viewClass.contains("EditText")) {
+                EditText et = (EditText) containerView.getChildAt(i);
+                if (et.getTag() != null && et.getTag().toString().contains(getString(R.string.label_required))) {
+                    String[] data = et.getTag().toString().split(";");
+                    try {
+                        reportObject.put(data[1],et.getText().toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }else {
+                    try {
+                        reportObject.put(et.getTag().toString(),et.getText().toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    private void updateReport(){
+        Hubbler.getApp(Objects.requireNonNull(getActivity())).getExecutor().execute(()->{
+            Report report = new Report();
+            report.setReport(reportObject.toString());
+            report.setId(id);
+            report.setAddedTime(new Date());
+            DatabaseClient.getInstance(getActivity().getApplicationContext()).getAppDatabase().reportDao().update(report);
+            ((ViewReportActivity)Objects.requireNonNull(getActivity())).setReport(report.getReport());
+        });
+    }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.button_update_report:
+                if(ensureValidated()){
+                    createReportObject();
+                    updateReport();
+                    getActivity().onBackPressed();
+                }
                 break;
         }
     }

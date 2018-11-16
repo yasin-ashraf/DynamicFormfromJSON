@@ -1,8 +1,10 @@
 package com.yasin.hubbler.Database;
 
 import android.arch.persistence.room.Dao;
+import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import com.yasin.hubbler.Model.Report;
 
@@ -18,6 +20,12 @@ public interface ReportDao {
 
     @Insert(onConflict = REPLACE)
     void save(Report report);
+
+    @Update
+    void update(Report report);
+
+    @Delete
+    void delete(Report report);
 
     @Query("SELECT * FROM report")
     List<Report> load();
