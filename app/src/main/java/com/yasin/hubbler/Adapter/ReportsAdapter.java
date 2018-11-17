@@ -78,10 +78,10 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportsV
         long duration  = currentDate.getTime() - addedDate.getTime();
         if(TimeUnit.MILLISECONDS.toMinutes(duration) > 60){
             if(TimeUnit.MILLISECONDS.toHours(duration) > 24){
-                dayTime = "day";
+                dayTime = context.getResources().getQuantityString(R.plurals.days,(int) TimeUnit.MILLISECONDS.toDays(duration));
                 return TimeUnit.MILLISECONDS.toDays(duration);
             }
-            dayTime = "hr";
+            dayTime = context.getResources().getQuantityString(R.plurals.hours,(int) TimeUnit.MILLISECONDS.toHours(duration));
             return TimeUnit.MILLISECONDS.toHours(duration);
         }
         dayTime = "min";

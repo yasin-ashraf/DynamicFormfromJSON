@@ -28,4 +28,12 @@
     <string name="label_yes_delete">Yes, Delete this</string>
     <string name="label_no_dont">No, don\'t</string>
     <string name="toast_report_deleted">Report Deleted</string>
+    <plurals name="days">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <plurals name="hours">
+        <item quantity="one">hr</item>
+        <item quantity="other">hrs</item>
+    </plurals>
 </resources>
