@@ -284,8 +284,8 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
             report.setReport(reportObject.toString());
             report.setId(id);
             report.setAddedTime(new Date());
-            DatabaseClient.getInstance(getActivity().getApplicationContext()).getAppDatabase().reportDao().update(report);
-            ((ViewReportActivity)Objects.requireNonNull(getActivity())).setReport(report.getReport());
+            DatabaseClient.getInstance(getActivity().getApplicationContext()).getAppDatabase().reportDao().update(report); //update Report in DB
+            ((ViewReportActivity)Objects.requireNonNull(getActivity())).setReport(report.getReport()); // Update Report Object in Activity
         });
     }
 

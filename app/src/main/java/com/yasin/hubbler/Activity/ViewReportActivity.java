@@ -53,13 +53,13 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(view -> onBackPressed());
 
-        parseJson();
         showFields();
         editButton.setOnClickListener(this);
     }
 
     public void setReport(String report) {
         this.report = report;
+        createHeaders();
     }
 
     public String getReport() {
@@ -70,6 +70,7 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
      * Add ViewReport fragment to container to show the fields.
      */
     private void showFields(){
+        createHeaders();
         Bundle args = new Bundle();
         args.putStringArrayList("fields",fields);
         ViewReportFragment reportFragment = new ViewReportFragment();
@@ -95,7 +96,7 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
                 .commit();
     }
 
-    private void parseJson(){
+    private void createHeaders(){
         JSONObject reportObject;
         try {
             reportObject = new JSONObject(report);
