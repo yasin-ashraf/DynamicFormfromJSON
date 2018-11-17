@@ -1,5 +1,6 @@
 package com.yasin.hubbler.Fragment;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -91,6 +92,9 @@ public class ViewReportFragment extends Fragment {
 
     private RelativeLayout.LayoutParams getTextViewLayoutParams() {
         RelativeLayout.LayoutParams textViewLayoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {// add extra margin for devices below Marshmallow
+            textViewLayoutParams.setMargins(75, 25, 50, 25);
+        }
         textViewLayoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
         return textViewLayoutParams;
     }

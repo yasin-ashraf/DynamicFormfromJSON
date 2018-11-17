@@ -7,7 +7,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -202,7 +201,6 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         return editText;
     }
 
-    //TODO: SRE - Create specific classes to generate views, do at the end.
     private Spinner createSpinner(String fieldName,ArrayList<String> options) {
         Spinner spinner = spinnerGenerator.generateSpinner(options);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -266,12 +264,6 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
             public void afterTextChanged(Editable editable) {
             }
         });
-    }
-
-    private LinearLayout.LayoutParams getGeneralLayoutParams(){
-        LinearLayout.LayoutParams generalLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        generalLayoutParams.setMargins(50, 25, 50, 10);
-        return generalLayoutParams;
     }
 
     /**
