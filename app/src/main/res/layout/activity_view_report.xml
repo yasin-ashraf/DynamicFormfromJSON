@@ -82,4 +82,17 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"/>
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:backgroundTint="@color/white"
+        app:fabSize="normal"
+        android:src="@drawable/ic_delete"
+        android:tint="@color/colorPrimaryDark"
+        app:layout_anchor="@id/appBar"
+        app:layout_anchorGravity="bottom|end"
+        android:layout_margin="20dp"/>
+
+
 </android.support.design.widget.CoordinatorLayout>

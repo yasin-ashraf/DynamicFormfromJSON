@@ -23,4 +23,9 @@
     <string name="label_email">email</string>
     <string name="label_number">number</string>
     <string name="label_update">Update</string>
+    <string name="label_delete">Delete</string>
+    <string name="label_are_you_sure">Are you sure you want to delete this item?</string>
+    <string name="label_yes_delete">Yes, Delete this</string>
+    <string name="label_no_dont">No, don\'t</string>
+    <string name="toast_report_deleted">Report Deleted</string>
 </resources>
