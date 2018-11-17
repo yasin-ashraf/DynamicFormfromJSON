@@ -70,6 +70,7 @@ public class ReportsActivity extends AppCompatActivity implements View.OnClickLi
             if(reports.size() == 0){
                 this.runOnUiThread(() ->{ //switch back to UI thread for switching view
                     emptyReports.setVisibility(View.VISIBLE);
+                    reportsCount.setText(0);
                 });
             }else {
                 this.runOnUiThread(() -> {//switch back to UI thread for switching view

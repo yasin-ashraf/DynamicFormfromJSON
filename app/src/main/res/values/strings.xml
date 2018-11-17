@@ -28,6 +28,9 @@
     <string name="label_yes_delete">Yes, Delete this</string>
     <string name="label_no_dont">No, don\'t</string>
     <string name="toast_report_deleted">Report Deleted</string>
+    <string name="label_text">text</string>
+    <string name="label_composite">composite</string>
+    <string name="label_fields">fields</string>
     <plurals name="days">
         <item quantity="one">day</item>
         <item quantity="other">days</item>
