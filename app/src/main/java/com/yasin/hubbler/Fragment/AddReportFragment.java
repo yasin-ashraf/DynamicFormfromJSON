@@ -93,6 +93,7 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
 
                 boolean required = false;
                 int min = -1,max = -1;
+                String compositeFields;
                 ArrayList<String> options = null;
                 if (viewObject.has(getString(R.string.label_required))) required = viewObject.getBoolean(getString(R.string.label_required));
                 if (viewObject.has(getString(R.string.label_min))) min = viewObject.getInt(getString(R.string.label_min));
@@ -102,6 +103,10 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
                     for (int j = 0; j < viewObject.getJSONArray(getString(R.string.label_options)).length(); j++) {
                         options.add(viewObject.getJSONArray(getString(R.string.label_options)).get(j).toString());
                     }
+                }
+                if (viewObject.has(getString(R.string.label_fields))){
+                    compositeFields = viewObject.getJSONArray(getString(R.string.label_fields)).toString();
+
                 }
                 generateViews(type,fieldName,options,required,min,max);
             }
