@@ -74,7 +74,7 @@ public class ViewReportFragment extends Fragment {
                 .replace("{","")
                 .replace("}","")
                 .replace("\"","")
-                .replace(",",", ");
+                .replace(",","\n");
         textView[1].setText(finalText);
 
         RelativeLayout.LayoutParams layoutParams = getGeneralLayoutParams();

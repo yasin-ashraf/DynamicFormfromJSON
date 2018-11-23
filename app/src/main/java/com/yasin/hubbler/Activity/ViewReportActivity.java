@@ -97,7 +97,6 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
     private void showEditFields(){
         Bundle args = new Bundle();
         args.putInt("id",id);
-        args.putString("fields",report);
         EditReportFragment editReportFragment = new EditReportFragment();
         editReportFragment.setArguments(args);
         getSupportFragmentManager().beginTransaction()
