@@ -59,9 +59,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String report = ((ViewReportActivity)Objects.requireNonNull(getActivity())).getReport();
         id = Objects.requireNonNull(getArguments()).getInt("id");
-        initReportObject(report);
         emailValidator = new EmailValidator();
         numberValidator = new NumberValidator();
         editTextGenerator = new EditTextGenerator(getActivity());
@@ -83,7 +81,15 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_edit_report,container,false);
         initViews(view);
-        readJsonFile();
+        if(getArguments().getBoolean("isComposite")){
+            initReportObject(getArguments().getString("value"));
+            parseJsonData(getArguments().getString("fields"));
+        }else {
+            String report = ((ViewReportActivity)Objects.requireNonNull(getActivity())).getReport();
+            initReportObject(report);
+            readJsonFile();
+        }
+
         return view;
     }
 
@@ -178,7 +184,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
             JSONObject jsonObject = new JSONObject(value);
             linearLayout = compositeBoxViewGenerator.createBoxViewWithTypedValues(jsonObject);
             linearLayout.setOnClickListener(view -> {
-
+                ((ViewReportActivity)getActivity()).replaceWithCompositeFragment(value,compositeFields);
             });
         } catch (JSONException e) {
             e.printStackTrace();
@@ -318,9 +324,13 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
         switch (view.getId()){
             case R.id.button_update_report:
                 if(ensureValidated()){
-                    createReportObject();
-                    updateReport();
-                    getActivity().onBackPressed();
+                    if(getArguments().getBoolean("isComposite")){
+
+                    }else {
+                        createReportObject();
+                        updateReport();
+                        getActivity().onBackPressed();
+                    }
                 }
                 break;
         }

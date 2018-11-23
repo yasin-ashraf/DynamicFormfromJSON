@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -97,6 +96,7 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
     private void showEditFields(){
         Bundle args = new Bundle();
         args.putInt("id",id);
+        args.putBoolean("isComposite",isInComposite);
         EditReportFragment editReportFragment = new EditReportFragment();
         editReportFragment.setArguments(args);
         getSupportFragmentManager().beginTransaction()
@@ -105,6 +105,22 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
                 .addToBackStack("editReportFragment")
                 .commit();
     }
+
+    public void replaceWithCompositeFragment(String value, String compositeFields){
+        isInComposite = true;
+        Bundle args = new Bundle();
+        args.putString("fields",compositeFields);
+        args.putString("value",value);
+        args.putBoolean("isComposite",isInComposite);
+        EditReportFragment compositeFragment = new EditReportFragment();
+        compositeFragment.setArguments(args);
+        getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(R.animator.enter,R.animator.exit,R.animator.enter_rev,R.animator.exit_rev)
+                .replace(R.id.container, compositeFragment,"compositeFragment")
+                .addToBackStack(null)
+                .commit();
+    }
+
 
     private void createHeaders(){
         JSONObject reportObject;
@@ -163,11 +179,15 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public void onBackPressed() {
-        if(getSupportFragmentManager().getBackStackEntryCount() > 0){
+        if(getSupportFragmentManager().getBackStackEntryCount() > 1){
+            getSupportFragmentManager().popBackStack();
+        }else if(getSupportFragmentManager().getBackStackEntryCount() == 1){
             getSupportFragmentManager().popBackStack();
             editButton.show();
             appBarLayout.setExpanded(true,true);
-        }else {
+            isInComposite = false;
+        }
+        else {
             super.onBackPressed();
         }
     }
