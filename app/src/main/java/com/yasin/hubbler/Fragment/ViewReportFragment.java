@@ -69,7 +69,13 @@ public class ViewReportFragment extends Fragment {
         textView[1] = new TextView(getActivity()); //second TextView for Field
         textView[1].setTextSize(18);
         textView[1].setTextAppearance(getActivity(),R.style.boldStyle);
-        textView[1].setText(field);
+        //Remove braces and unwanted characters from string.
+        String finalText = field
+                .replace("{","")
+                .replace("}","")
+                .replace("\"","")
+                .replace(",",", ");
+        textView[1].setText(finalText);
 
         RelativeLayout.LayoutParams layoutParams = getGeneralLayoutParams();
         layoutParams.addRule(RelativeLayout.RIGHT_OF, textView[0].getId()); //align to the right of first textView

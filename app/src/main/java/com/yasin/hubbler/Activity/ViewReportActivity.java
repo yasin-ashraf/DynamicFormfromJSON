@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -38,6 +39,7 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
     private FloatingActionButton editButton;
     private FloatingActionButton deleteButton;
     private AppBarLayout appBarLayout;
+    private Boolean isInComposite = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,6 +97,7 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
     private void showEditFields(){
         Bundle args = new Bundle();
         args.putInt("id",id);
+        args.putString("fields",report);
         EditReportFragment editReportFragment = new EditReportFragment();
         editReportFragment.setArguments(args);
         getSupportFragmentManager().beginTransaction()

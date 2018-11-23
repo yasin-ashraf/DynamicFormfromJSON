@@ -1,5 +1,6 @@
 package com.yasin.hubbler.Fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,12 +19,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.yasin.hubbler.Activity.AddReportActivity;
 import com.yasin.hubbler.DatabaseClient;
 import com.yasin.hubbler.Hubbler;
 import com.yasin.hubbler.Model.Report;
 import com.yasin.hubbler.R;
+import com.yasin.hubbler.ReportObjectListener;
 import com.yasin.hubbler.Validators.EmailValidator;
 import com.yasin.hubbler.Validators.NumberValidator;
+import com.yasin.hubbler.ViewGenerators.CompositeBoxViewGenerator;
 import com.yasin.hubbler.ViewGenerators.EditTextGenerator;
 import com.yasin.hubbler.ViewGenerators.SpinnerGenerator;
 import com.yasin.hubbler.ViewGenerators.TextViewGenerator;
@@ -43,23 +47,34 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
 
     private LinearLayout container;
     private FrameLayout buttonDone;
-    private Boolean valid = false;
-    private JSONObject reportObject;
     private EmailValidator emailValidator;
     private NumberValidator numberValidator;
     private EditTextGenerator editTextGenerator;
     private TextViewGenerator textViewGenerator;
     private SpinnerGenerator spinnerGenerator;
+    private CompositeBoxViewGenerator compositeBoxViewGenerator;
+    private ReportObjectListener reportObjectListener;
+    private Boolean valid = false;
+    private JSONObject reportObjectSlice;
+    private String compositeFieldName;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        reportObject = new JSONObject();
+        reportObjectSlice = new JSONObject();
         emailValidator = new EmailValidator();
         numberValidator = new NumberValidator();
         editTextGenerator = new EditTextGenerator(getActivity());
         textViewGenerator = new TextViewGenerator(getActivity());
         spinnerGenerator = new SpinnerGenerator(getActivity());
+        compositeBoxViewGenerator = new CompositeBoxViewGenerator(getActivity());
+        compositeFieldName = getArguments().getString("fieldName");
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        reportObjectListener = (ReportObjectListener) context;
+        super.onAttach(context);
     }
 
     @Nullable
@@ -67,8 +82,14 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_report, container, false);
         initViews(view);
-        parseJsonData(Objects.requireNonNull(getArguments()).getString("jsonData"));
         return view;
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        parseJsonData(Objects.requireNonNull(getArguments()).getString("fields"));
     }
 
     private void initViews(View view) {
@@ -93,7 +114,7 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
 
                 boolean required = false;
                 int min = -1,max = -1;
-                String compositeFields;
+                String compositeFields = "";
                 ArrayList<String> options = null;
                 if (viewObject.has(getString(R.string.label_required))) required = viewObject.getBoolean(getString(R.string.label_required));
                 if (viewObject.has(getString(R.string.label_min))) min = viewObject.getInt(getString(R.string.label_min));
@@ -108,19 +129,21 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
                     compositeFields = viewObject.getJSONArray(getString(R.string.label_fields)).toString();
 
                 }
-                generateViews(type,fieldName,options,required,min,max);
+                generateViews(type,fieldName,options,required,min,max,compositeFields);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private void generateViews(String type,String fieldName,ArrayList<String> options,Boolean required,int min,int max){// too much parameters??
+    private void generateViews(String type,String fieldName,ArrayList<String> options,Boolean required,int min,int max,String compositeFields){// too much parameters??
         container.addView(createTextView(fieldName));
         if(type.equals(getString(R.string.label_dropdown))){
             if (options != null) {
                 container.addView(createSpinner(fieldName,options));
             }
+        }else if(type.equals(getString(R.string.label_composite))) {
+            container.addView(createBoxView(fieldName, compositeFields));
         }else {
             container.addView(createEditText(type,fieldName,required,min,max));
         }
@@ -129,13 +152,13 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
     private void saveReport(){
         Hubbler.getApp(Objects.requireNonNull(getActivity())).getExecutor().execute(()->{
             Report report = new Report();
-            report.setReport(reportObject.toString());
+            report.setReport(((AddReportActivity)getActivity()).getReportObject().toString());
             report.setAddedTime(new Date());
             DatabaseClient.getInstance(getActivity()).getAppDatabase().reportDao().save(report);
         });
     }
 
-    private void createReportObject() {
+    private void createReportObjectSlice() {
         for (int i = 0; i < container.getChildCount(); i++) {
             String viewClass = container.getChildAt(i).getClass().getName();
             if (viewClass.contains("EditText")) {
@@ -143,16 +166,31 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
                 if (et.getTag() != null && et.getTag().toString().contains(getString(R.string.label_required))) {
                     String[] data = et.getTag().toString().split(";");
                     try {
-                        reportObject.put(data[1],et.getText().toString());
+                        reportObjectSlice.put(data[1],et.getText().toString());
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }else {
                     try {
-                        reportObject.put(et.getTag().toString(),et.getText().toString());
+                        reportObjectSlice.put(et.getTag().toString(),et.getText().toString());
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                }
+            }
+        }
+    }
+
+    private void createFinalReportObject() {
+        for (int i = 0; i < container.getChildCount(); i++) {
+            String viewClass = container.getChildAt(i).getClass().getName();
+            if (viewClass.contains("EditText")) {
+                EditText et = (EditText) container.getChildAt(i);
+                if (et.getTag() != null && et.getTag().toString().contains(getString(R.string.label_required))) {
+                    String[] data = et.getTag().toString().split(";");
+                    reportObjectListener.onCreateFinalReport(data[1],et.getText().toString());
+                }else {
+                    reportObjectListener.onCreateFinalReport(et.getTag().toString(),et.getText().toString());
                 }
             }
         }
@@ -184,41 +222,58 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
         }
     }
 
+    private LinearLayout createBoxView(String fieldName,String compositeFields){
+        if(((AddReportActivity)Objects.requireNonNull(getActivity())).getFilledCompositeFields().containsKey(fieldName)){
+            LinearLayout linearLayout = compositeBoxViewGenerator.createBoxViewWithTypedValues(((AddReportActivity)Objects.requireNonNull(getActivity())).getFilledCompositeFields().get(fieldName));
+            linearLayout.setOnClickListener(view -> {
+                ((AddReportActivity)Objects.requireNonNull(getActivity())).replaceWithCompositeFragment(fieldName,compositeFields);
+            });
+            return linearLayout;
+        }else {
+            LinearLayout linearLayout = compositeBoxViewGenerator.createBoxView(fieldName);
+            linearLayout.setOnClickListener(view -> {
+                ((AddReportActivity)Objects.requireNonNull(getActivity())).replaceWithCompositeFragment(fieldName,compositeFields);
+            });
+            return linearLayout;
+        }
+    }
+
     private TextView createTextView(String fieldName) {
         return textViewGenerator.generateTextView(fieldName);
     }
 
     private EditText createEditText(String type, String fieldName, Boolean required,int min,int max){// too much parameters??
         EditText editText = editTextGenerator.generateEditText(type, fieldName, required, min, max);
-        addTextChangedListener(editText,type,min,max);
+        addTextChangedListener(editText,type,min,max,fieldName);
+        if(((AddReportActivity)Objects.requireNonNull(getActivity())).getFilledFields().containsKey(fieldName)){
+            editText.setText(((AddReportActivity)Objects.requireNonNull(getActivity())).getFilledFields().get(fieldName));
+        }
         return editText;
     }
 
     private Spinner createSpinner(String fieldName, ArrayList<String> options) {
         Spinner spinner = spinnerGenerator.generateSpinner(options);
+        if(((AddReportActivity)Objects.requireNonNull(getActivity())).getFilledFields().containsKey(fieldName)){
+            spinner.setSelection(options.indexOf(((AddReportActivity)Objects.requireNonNull(getActivity())).getFilledFields().get(fieldName)));
+        }
+
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                try {
-                    reportObject.put(fieldName,adapterView.getSelectedItem().toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                reportObjectListener.onCreateFinalReport(fieldName,adapterView.getSelectedItem().toString());
+                ((AddReportActivity)Objects.requireNonNull(getActivity())).setFilledOtherField(fieldName,adapterView.getSelectedItem().toString());
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-                try {
-                    reportObject.put(fieldName,adapterView.getItemAtPosition(0).toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                reportObjectListener.onCreateFinalReport(fieldName,adapterView.getItemAtPosition(0).toString());
+                ((AddReportActivity)Objects.requireNonNull(getActivity())).setFilledOtherField(fieldName,adapterView.getItemAtPosition(0).toString());
             }
         });
         return spinner;
     }
 
-    private void addTextChangedListener(EditText editText,String type,int min,int max){
+    private void addTextChangedListener(EditText editText,String type,int min,int max,String fieldName){
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -231,6 +286,7 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
                         if(emailValidator.isValid(editText.getText().toString())){
                             editText.setError(null);
                             valid = true;
+                            ((AddReportActivity)Objects.requireNonNull(getActivity())).setFilledOtherField(fieldName,editText.getText().toString());
                         }else {
                             editText.setError(getString(R.string.label_valid_email));
                             valid = false;
@@ -242,6 +298,7 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
                             if(numberValidator.isValid(charSequence,min,max)){
                                 editText.setError(null);
                                 valid = true;
+                                ((AddReportActivity)Objects.requireNonNull(getActivity())).setFilledOtherField(fieldName,editText.getText().toString());
                             }else {
                                 editText.setError(String.format(getString(R.string.label_should_be_between),min,max));
                                 valid = false;
@@ -249,6 +306,10 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
                         } else {
                             valid = true;
                         }
+                        break;
+
+                     default:
+                        ((AddReportActivity)Objects.requireNonNull(getActivity())).setFilledOtherField(fieldName,editText.getText().toString());
                         break;
                 }
             }
@@ -264,11 +325,17 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
         switch (view.getId()) {
             case R.id.button_done:
                 if (ensureValidated()) {
-                    createReportObject();
-                    saveReport();
-                    Log.e("REPORT OBJECT",reportObject.toString());
-                    Toast.makeText(getActivity(), R.string.label_report_added, Toast.LENGTH_SHORT).show();
-                    getActivity().finish();
+                    if(((AddReportActivity)getActivity()).isInComposite()){
+                        createReportObjectSlice();
+                        ((AddReportActivity)getActivity()).setFilledCompositeField(compositeFieldName,reportObjectSlice);
+                        reportObjectListener.onUpdateReport(reportObjectSlice.toString(),compositeFieldName);
+                    }else {
+                        createFinalReportObject();
+                        saveReport();
+                        Log.e("REPORT OBJECT",((AddReportActivity) getActivity()).getReportObject().toString());
+                        Toast.makeText(getActivity(), R.string.label_report_added, Toast.LENGTH_SHORT).show();
+                        getActivity().finish();
+                    }
                 }
                 break;
         }

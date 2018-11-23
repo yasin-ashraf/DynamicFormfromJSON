@@ -24,6 +24,7 @@ import com.yasin.hubbler.Model.Report;
 import com.yasin.hubbler.R;
 import com.yasin.hubbler.Validators.EmailValidator;
 import com.yasin.hubbler.Validators.NumberValidator;
+import com.yasin.hubbler.ViewGenerators.CompositeBoxViewGenerator;
 import com.yasin.hubbler.ViewGenerators.EditTextGenerator;
 import com.yasin.hubbler.ViewGenerators.SpinnerGenerator;
 import com.yasin.hubbler.ViewGenerators.TextViewGenerator;
@@ -48,6 +49,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
     private EditTextGenerator editTextGenerator;
     private TextViewGenerator textViewGenerator;
     private SpinnerGenerator spinnerGenerator;
+    private CompositeBoxViewGenerator compositeBoxViewGenerator;
     private LinearLayout containerView;
     private FrameLayout updateButton;
     private JSONObject reportObject;
@@ -65,6 +67,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
         editTextGenerator = new EditTextGenerator(getActivity());
         textViewGenerator = new TextViewGenerator(getActivity());
         spinnerGenerator = new SpinnerGenerator(getActivity());
+        compositeBoxViewGenerator = new CompositeBoxViewGenerator(getActivity());
     }
 
     private void initReportObject(String report) {
@@ -110,7 +113,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
 
     /**
      * Parse JSON file again and create views accordingly.
-     * get appropriate saved values from
+     * get appropriate saved values from saved json string
      */
     private void parseJsonData(String jsonData) {
         try {
@@ -123,6 +126,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
 
                 boolean required = false;
                 int min = -1,max = -1;
+                String compositeFields = "";
                 ArrayList<String> options = null;
                 if (viewObject.has(getString(R.string.label_required))) required = viewObject.getBoolean(getString(R.string.label_required));
                 if (viewObject.has(getString(R.string.label_min))) min = viewObject.getInt(getString(R.string.label_min));
@@ -133,20 +137,25 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
                         options.add(viewObject.getJSONArray(getString(R.string.label_options)).get(j).toString());
                     }
                 }
+                if (viewObject.has(getString(R.string.label_fields))){
+                    compositeFields = viewObject.getJSONArray(getString(R.string.label_fields)).toString();
+                }
                 String value = reportObject.getString(fieldName);
-                createViews(type,fieldName,options,required,value,min,max);
+                createViews(type,fieldName,options,required,value,min,max,compositeFields);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private void createViews(String type,String fieldName,ArrayList<String> options,Boolean required,String value,int min,int max){// too much parameters??
+    private void createViews(String type,String fieldName,ArrayList<String> options,Boolean required,String value,int min,int max, String compositeFields){// too much parameters??
         containerView.addView(createTextView(fieldName));
         if(type.equals(getString(R.string.label_dropdown))){
             if (options != null) {
                 containerView.addView(createSpinner(fieldName,options,value));
             }
+        }else if(type.equals(getString(R.string.label_composite))) {
+            containerView.addView(createBoxView(fieldName, compositeFields,value));
         }else {
             containerView.addView(createEditText(type,fieldName,required,min,max,value));
         }
@@ -162,6 +171,21 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
         addTextChangedListener(editText,type,min,max);
         return editText;
     }
+
+    private LinearLayout createBoxView(String fieldName,String compositeFields, String value){
+        LinearLayout linearLayout = null;
+        try {
+            JSONObject jsonObject = new JSONObject(value);
+            linearLayout = compositeBoxViewGenerator.createBoxViewWithTypedValues(jsonObject);
+            linearLayout.setOnClickListener(view -> {
+
+            });
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return linearLayout;
+    }
+
 
     private Spinner createSpinner(String fieldName, ArrayList<String> options,String value) {
         Spinner spinner = spinnerGenerator.generateSpinner(options);

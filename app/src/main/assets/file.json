@@ -16,26 +16,6 @@
     "max": "30"
   },
   {
-    "field-name": "About",
-    "type": "multiline",
-    "required": true
-  },
-  {
-    "field-name": "Current Position",
-    "type": "text",
-    "required": true
-  },
-  {
-    "field-name": "gender",
-    "type": "dropdown",
-    "options": [
-      "male",
-      "female",
-      "other"
-    ]
-  },
-
-  {
     "field-name": "address",
     "type": "composite",
     "fields": [
@@ -60,5 +40,24 @@
       }
     ],
     "required": false
+  },
+  {
+    "field-name": "About",
+    "type": "multiline",
+    "required": true
+  },
+  {
+    "field-name": "Current Position",
+    "type": "text",
+    "required": true
+  },
+  {
+    "field-name": "gender",
+    "type": "dropdown",
+    "options": [
+      "male",
+      "female",
+      "other"
+    ]
   }
 ]

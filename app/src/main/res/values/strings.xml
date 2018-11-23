@@ -31,6 +31,7 @@
     <string name="label_text">text</string>
     <string name="label_composite">composite</string>
     <string name="label_fields">fields</string>
+    <string name="label_add_a">Add %s</string>
     <plurals name="days">
         <item quantity="one">day</item>
         <item quantity="other">days</item>
