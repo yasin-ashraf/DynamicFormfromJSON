@@ -2,7 +2,6 @@ package com.yasin.hubbler.Activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -90,7 +89,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
 
             showReportEditor(jsonData);
 
-            Log.e("data", jsonData);
+            Log.e(getString(R.string.label_data), jsonData);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -98,7 +97,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
 
     private void showReportEditor(String json){
         Bundle args = new Bundle();
-        args.putString("fields",json);
+        args.putString(getString(R.string.label_fields),json);
         AddReportFragment addReportFragment = new AddReportFragment();
         addReportFragment.setArguments(args);
         getSupportFragmentManager().beginTransaction()
@@ -111,8 +110,8 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         pageTitle.setText(String.format(getString(R.string.label_add_a),fieldName));
         isInComposite = true;
         Bundle args = new Bundle();
-        args.putString("fields",compositeFields);
-        args.putString("fieldName",fieldName);
+        args.putString(getString(R.string.label_fields),compositeFields);
+        args.putString(getString(R.string.label_fieldname),fieldName);
         AddReportFragment compositeFragment = new AddReportFragment();
         compositeFragment.setArguments(args);
         getSupportFragmentManager().beginTransaction()

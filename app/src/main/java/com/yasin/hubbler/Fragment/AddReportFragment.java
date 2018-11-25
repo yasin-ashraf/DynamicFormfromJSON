@@ -68,7 +68,7 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
         textViewGenerator = new TextViewGenerator(getActivity());
         spinnerGenerator = new SpinnerGenerator(getActivity());
         compositeBoxViewGenerator = new CompositeBoxViewGenerator(getActivity());
-        compositeFieldName = getArguments().getString("fieldName");
+        compositeFieldName = getArguments().getString(getString(R.string.label_fieldname));
     }
 
     @Override
@@ -89,7 +89,7 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
     @Override
     public void onStart() {
         super.onStart();
-        parseJsonData(Objects.requireNonNull(getArguments()).getString("fields"));
+        parseJsonData(Objects.requireNonNull(getArguments()).getString(getString(R.string.label_fields)));
     }
 
     private void initViews(View view) {
@@ -243,7 +243,7 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
     }
 
     private EditText createEditText(String type, String fieldName, Boolean required,int min,int max){// too much parameters??
-        EditText editText = editTextGenerator.generateEditText(type, fieldName, required, min, max);
+        EditText editText = editTextGenerator.generateEditText(type, fieldName, required);
         addTextChangedListener(editText,type,min,max,fieldName);
         if(((AddReportActivity)Objects.requireNonNull(getActivity())).getFilledFields().containsKey(fieldName)){
             editText.setText(((AddReportActivity)Objects.requireNonNull(getActivity())).getFilledFields().get(fieldName));

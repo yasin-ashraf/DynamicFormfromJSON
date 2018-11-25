@@ -45,9 +45,9 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_report);
-        id = getIntent().getExtras().getInt("id");
+        id = getIntent().getExtras().getInt(getString(R.string.label_id));
         report = getIntent().getExtras().getString("json");
-        fields = getIntent().getExtras().getStringArrayList("fields");
+        fields = getIntent().getExtras().getStringArrayList(getString(R.string.label_fields));
         init();
     }
 
@@ -95,7 +95,7 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
     private void showFields(){
         createHeaders();
         Bundle args = new Bundle();
-        args.putStringArrayList("fields",fields);
+        args.putStringArrayList(getString(R.string.label_fields),fields);
         ViewReportFragment reportFragment = new ViewReportFragment();
         reportFragment.setArguments(args);
         getSupportFragmentManager().beginTransaction()
@@ -109,8 +109,8 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
      */
     private void showEditFields(){
         Bundle args = new Bundle();
-        args.putInt("id",id);
-        args.putBoolean("isComposite",isInComposite);
+        args.putInt(getString(R.string.label_id),id);
+        args.putBoolean(getString(R.string.label_isComposite),isInComposite);
         EditReportFragment editReportFragment = new EditReportFragment();
         editReportFragment.setArguments(args);
         getSupportFragmentManager().beginTransaction()
@@ -123,10 +123,10 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
     public void replaceWithCompositeFragment(String fieldName,String value, String compositeFields){
         isInComposite = true;
         Bundle args = new Bundle();
-        args.putString("fields",compositeFields);
-        args.putString("value",value);
-        args.putString("fieldName",fieldName);
-        args.putBoolean("isComposite",isInComposite);
+        args.putString(getString(R.string.label_fields),compositeFields);
+        args.putString(getString(R.string.label_value),value);
+        args.putString(getString(R.string.label_fieldname),fieldName);
+        args.putBoolean(getString(R.string.label_isComposite),isInComposite);
         EditReportFragment compositeFragment = new EditReportFragment();
         compositeFragment.setArguments(args);
         getSupportFragmentManager().beginTransaction()

@@ -60,7 +60,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        id = Objects.requireNonNull(getArguments()).getInt("id");
+        id = Objects.requireNonNull(getArguments()).getInt(getString(R.string.label_id));
         emailValidator = new EmailValidator();
         numberValidator = new NumberValidator();
         editTextGenerator = new EditTextGenerator(getActivity());
@@ -82,10 +82,10 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_edit_report,container,false);
         initViews(view);
-        if(getArguments().getBoolean("isComposite")){
-            initReportObject(getArguments().getString("value"));
-            parseJsonData(getArguments().getString("fields"));
-            compositeFieldName = Objects.requireNonNull(getArguments()).getString("fieldName");
+        if(getArguments().getBoolean(getString(R.string.label_isComposite))){
+            initReportObject(getArguments().getString(getString(R.string.label_value)));
+            parseJsonData(getArguments().getString(getString(R.string.label_fields)));
+            compositeFieldName = Objects.requireNonNull(getArguments()).getString(getString(R.string.label_fieldname));
         }else {
             String report = ((ViewReportActivity)Objects.requireNonNull(getActivity())).getReport();
             initReportObject(report);
@@ -173,7 +173,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
     }
 
     private EditText createEditText(String type, String fieldName, Boolean required, int min, int max, String value){// too much parameters??
-        EditText editText = editTextGenerator.generateEditText(type, fieldName, required, min, max);
+        EditText editText = editTextGenerator.generateEditText(type, fieldName, required);
         editText.setText(value);
         addTextChangedListener(editText,type,min,max);
         return editText;
@@ -310,7 +310,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
     }
 
     private void updateReport(){
-        if(getArguments().getBoolean("isComposite")){
+        if(getArguments().getBoolean(getString(R.string.label_isComposite))){
             ((ViewReportActivity)Objects.requireNonNull(getActivity())).updateReport(compositeFieldName,reportObject.toString()); // Update Report Object in Activity
         }else {
             Hubbler.getApp(Objects.requireNonNull(getActivity())).getExecutor().execute(()->{

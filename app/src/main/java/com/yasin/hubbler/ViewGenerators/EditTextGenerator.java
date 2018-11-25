@@ -22,7 +22,7 @@ public class EditTextGenerator {
         this.context = context;
     }
 
-    public EditText generateEditText(String type, String fieldName, Boolean required, int min, int max){
+    public EditText generateEditText(String type, String fieldName, Boolean required){
         EditText editText = new EditText(this.context);
         editText.setHint(String.format(context.getString(R.string.label_type_here), fieldName));
         editText.setHintTextColor(ContextCompat.getColor(this.context, R.color.hint));

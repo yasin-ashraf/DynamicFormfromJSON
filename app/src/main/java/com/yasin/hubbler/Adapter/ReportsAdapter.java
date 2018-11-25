@@ -53,7 +53,7 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportsV
             if(fields.size() > 1){
                 reportsViewHolder.identifierTwo.setText(String.format("%s : %s",fields.get(1),reportObject.get(fields.get(1))));
             }
-            reportsViewHolder.addedTime.setText(String.format("%s %s ago",getTimeInterval(report.getAddedTime()),dayTime));
+            reportsViewHolder.addedTime.setText(String.format(context.getString(R.string.label_time_ago),getTimeInterval(report.getAddedTime()),dayTime));
             reportsViewHolder.firstLetter.setText(String.valueOf(reportObject.get(fields.get(0)).toString().charAt(0)));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -61,9 +61,9 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportsV
 
         reportsViewHolder.itemView.setOnClickListener(view ->{
             Intent intent = new Intent(context,ViewReportActivity.class);
-            intent.putExtra("id",report.getId());
+            intent.putExtra(context.getString(R.string.label_id),report.getId());
             intent.putExtra("json",report.getReport());
-            intent.putStringArrayListExtra("fields", new ArrayList<>(fields));
+            intent.putStringArrayListExtra(context.getString(R.string.label_fields), new ArrayList<>(fields));
             context.startActivity(intent);
         });
     }
@@ -84,7 +84,7 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportsV
             dayTime = context.getResources().getQuantityString(R.plurals.hours,(int) TimeUnit.MILLISECONDS.toHours(duration));
             return TimeUnit.MILLISECONDS.toHours(duration);
         }
-        dayTime = "min";
+        dayTime = context.getString(R.string.label_min);
         return TimeUnit.MILLISECONDS.toMinutes(duration);
     }
 

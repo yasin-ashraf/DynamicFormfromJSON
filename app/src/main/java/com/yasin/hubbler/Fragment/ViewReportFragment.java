@@ -35,7 +35,7 @@ public class ViewReportFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_view_report, container, false);
         initViews(view);
         String report = ((ViewReportActivity)Objects.requireNonNull(getActivity())).getReport();
-        ArrayList<String> fields = Objects.requireNonNull(getArguments()).getStringArrayList("fields");
+        ArrayList<String> fields = Objects.requireNonNull(getArguments()).getStringArrayList(getString(R.string.label_fields));
         createViews(report,Objects.requireNonNull(fields));
         return view;
     }

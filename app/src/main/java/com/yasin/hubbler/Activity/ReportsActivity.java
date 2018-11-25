@@ -101,7 +101,7 @@ public class ReportsActivity extends AppCompatActivity implements View.OnClickLi
                 viewArray = new JSONArray(jsonData);
                 for (int i = 0; i < viewArray.length(); i++) { // for-each not applicable to jsonArray
                     JSONObject viewObject = viewArray.getJSONObject(i);
-                    final String fieldName = viewObject.getString("field-name");
+                    final String fieldName = viewObject.getString(getString(R.string.label_field_name));
                     fields.add(fieldName);
                 }
             } catch (JSONException e) {
