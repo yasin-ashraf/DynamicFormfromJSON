@@ -37,7 +37,7 @@
     <string name="label_isComposite">isComposite</string>
     <string name="label_value">value</string>
     <string name="label_fieldname">fieldName</string>
-    <string name="label_time_ago">%d %d ago</string>
+    <string name="label_time_ago">%d %s ago</string>
     <plurals name="days">
         <item quantity="one">day</item>
         <item quantity="other">days</item>
