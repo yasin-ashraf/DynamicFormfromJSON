@@ -55,6 +55,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
     private JSONObject reportObject;
     private Boolean valid = false;
     private Integer id;
+    private String compositeFieldName;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -84,6 +85,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
         if(getArguments().getBoolean("isComposite")){
             initReportObject(getArguments().getString("value"));
             parseJsonData(getArguments().getString("fields"));
+            compositeFieldName = Objects.requireNonNull(getArguments()).getString("fieldName");
         }else {
             String report = ((ViewReportActivity)Objects.requireNonNull(getActivity())).getReport();
             initReportObject(report);
@@ -111,7 +113,6 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
 
             parseJsonData(jsonData);
 
-            Log.e("data", jsonData);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -184,7 +185,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
             JSONObject jsonObject = new JSONObject(value);
             linearLayout = compositeBoxViewGenerator.createBoxViewWithTypedValues(jsonObject);
             linearLayout.setOnClickListener(view -> {
-                ((ViewReportActivity)getActivity()).replaceWithCompositeFragment(value,compositeFields);
+                ((ViewReportActivity)getActivity()).replaceWithCompositeFragment(fieldName,value,compositeFields);
             });
         } catch (JSONException e) {
             e.printStackTrace();
@@ -309,14 +310,19 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
     }
 
     private void updateReport(){
-        Hubbler.getApp(Objects.requireNonNull(getActivity())).getExecutor().execute(()->{
-            Report report = new Report();
-            report.setReport(reportObject.toString());
-            report.setId(id);
-            report.setAddedTime(new Date());
-            DatabaseClient.getInstance(getActivity().getApplicationContext()).getAppDatabase().reportDao().update(report); //update Report in DB
-            ((ViewReportActivity)Objects.requireNonNull(getActivity())).setReport(report.getReport()); // Update Report Object in Activity
-        });
+        if(getArguments().getBoolean("isComposite")){
+            ((ViewReportActivity)Objects.requireNonNull(getActivity())).updateReport(compositeFieldName,reportObject.toString()); // Update Report Object in Activity
+        }else {
+            Hubbler.getApp(Objects.requireNonNull(getActivity())).getExecutor().execute(()->{
+                Report report = new Report();
+                report.setReport(reportObject.toString());
+                report.setId(id);
+                report.setAddedTime(new Date());
+                DatabaseClient.getInstance(getActivity().getApplicationContext()).getAppDatabase().reportDao().update(report); //update Report in DB
+                ((ViewReportActivity)Objects.requireNonNull(getActivity())).setReport(report.getReport()); // Update Report Object in Activity
+            });
+
+        }
     }
 
     @Override
@@ -324,13 +330,9 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
         switch (view.getId()){
             case R.id.button_update_report:
                 if(ensureValidated()){
-                    if(getArguments().getBoolean("isComposite")){
-
-                    }else {
-                        createReportObject();
-                        updateReport();
-                        getActivity().onBackPressed();
-                    }
+                    createReportObject();
+                    updateReport();
+                    getActivity().onBackPressed();
                 }
                 break;
         }

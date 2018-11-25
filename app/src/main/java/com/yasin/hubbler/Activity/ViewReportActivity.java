@@ -8,6 +8,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -68,11 +69,24 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
 
     public void setReport(String report) {
         this.report = report;
-        createHeaders();
+        runOnUiThread(()->{
+            createHeaders();
+        });
     }
 
     public String getReport() {
         return report;
+    }
+
+    public void updateReport(String fieldName, String value){
+        try {
+            JSONObject reportObj = new JSONObject(report);
+            reportObj.put(fieldName,value);
+            this.report = reportObj.toString();
+            Log.e("REPORT SLICE",report);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -106,11 +120,12 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
                 .commit();
     }
 
-    public void replaceWithCompositeFragment(String value, String compositeFields){
+    public void replaceWithCompositeFragment(String fieldName,String value, String compositeFields){
         isInComposite = true;
         Bundle args = new Bundle();
         args.putString("fields",compositeFields);
         args.putString("value",value);
+        args.putString("fieldName",fieldName);
         args.putBoolean("isComposite",isInComposite);
         EditReportFragment compositeFragment = new EditReportFragment();
         compositeFragment.setArguments(args);
