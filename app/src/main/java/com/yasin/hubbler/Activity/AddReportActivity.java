@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * Created by im_yasinashraf started on 1/11/18.
@@ -34,6 +35,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
     private boolean isInComposite = false;
     private Map<String,JSONObject> filledCompositeFields;
     private Map<String,String> filledFields;
+    private Stack<String> titles;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,6 +44,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         reportObject = new JSONObject();
         filledCompositeFields = new HashMap<>();
         filledFields = new HashMap<>();
+        titles = new Stack<>();
         init();
         readJsonFile();
     }
@@ -108,6 +111,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
 
     public void replaceWithCompositeFragment(String fieldName, String compositeFields){
         pageTitle.setText(String.format(getString(R.string.label_add_a),fieldName));
+        titles.push(fieldName);
         isInComposite = true;
         Bundle args = new Bundle();
         args.putString(getString(R.string.label_fields),compositeFields);
@@ -187,6 +191,8 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
     public void onBackPressed() {
         if(getSupportFragmentManager().getBackStackEntryCount() > 1){
             getSupportFragmentManager().popBackStack();
+            titles.pop();
+            pageTitle.setText(String.format(getString(R.string.label_add_a),titles.peek()));
         }else if(getSupportFragmentManager().getBackStackEntryCount() == 1){
             isInComposite = false;
             pageTitle.setText(getString(R.string.label_add_a_report));

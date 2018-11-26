@@ -12,8 +12,8 @@
   {
     "field-name": "age",
     "type": "number",
-    "min": "22",
-    "max": "30"
+    "min": "20",
+    "max": "50"
   },
   {
     "field-name": "address",
@@ -38,6 +38,58 @@
         "type": "text",
         "required": true
       }
+    ],
+    "required": false
+  },
+  {
+    "field-name": "Experience",
+    "type": "composite",
+    "fields": [
+      {
+        "field-name": "Company Name",
+        "type": "text",
+        "required": true
+      },
+      {
+        "field-name": "Duration in years",
+        "type": "number",
+        "min": "0",
+        "max": "10"
+      },
+      {
+        "field-name": "Role",
+        "type": "text",
+        "required": true
+      },
+      {
+        "field-name": "Place",
+        "type": "text",
+        "required": true
+      },
+      {
+        "field-name": "Experience in Android",
+        "type": "composite",
+        "fields": [
+          {
+            "field-name": "Technologies",
+            "type": "multiline",
+            "required": true
+          },
+          {
+            "field-name": "Duration in years",
+            "type": "number",
+            "min": "0",
+            "max": "10"
+          },
+          {
+            "field-name": "Projects",
+            "type": "multiline",
+            "required": true
+          }
+        ],
+        "required": false
+      }
+
     ],
     "required": false
   },

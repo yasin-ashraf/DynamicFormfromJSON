@@ -40,7 +40,8 @@ public class CompositeBoxViewGenerator {
         String text = "";
         for(int i = 0; i<fieldValues.names().length(); i++){
             try {
-               text = text.concat(fieldValues.getString(fieldValues.names().getString(i))).concat(" ").concat(",");
+               text = text.concat(fieldValues.getString(fieldValues.names().getString(i))).concat(" ").concat(",").replace("{","")
+                       .replace("}","").replace("\"","");
             } catch (JSONException e) {
                 e.printStackTrace();
             }
