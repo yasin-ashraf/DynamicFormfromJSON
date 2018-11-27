@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,7 +82,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
         View view = inflater.inflate(R.layout.fragment_edit_report,container,false);
         initViews(view);
         if(getArguments().getBoolean(getString(R.string.label_isComposite))){
-            initReportObject(getArguments().getString(getString(R.string.label_value)));
+            initReportObject(((ViewReportActivity)getActivity()).getReportSlice());
             parseJsonData(getArguments().getString(getString(R.string.label_fields)));
             compositeFieldName = Objects.requireNonNull(getArguments()).getString(getString(R.string.label_fieldname));
         }else {
@@ -291,19 +290,11 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
             String viewClass = containerView.getChildAt(i).getClass().getName();
             if (viewClass.contains("EditText")) {
                 EditText et = (EditText) containerView.getChildAt(i);
-                if (et.getTag() != null && et.getTag().toString().contains(getString(R.string.label_required))) {
-                    String[] data = et.getTag().toString().split(";");
-                    try {
-                        reportObject.put(data[1],et.getText().toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }else {
-                    try {
-                        reportObject.put(et.getTag().toString(),et.getText().toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                String[] data = et.getTag().toString().split(";");
+                try {
+                    reportObject.put(data[0],et.getText().toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -321,7 +312,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
                 DatabaseClient.getInstance(getActivity().getApplicationContext()).getAppDatabase().reportDao().update(report); //update Report in DB
                 ((ViewReportActivity)Objects.requireNonNull(getActivity())).setReport(report.getReport()); // Update Report Object in Activity
             });
-
+            getActivity().onBackPressed();
         }
     }
 
@@ -332,7 +323,6 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
                 if(ensureValidated()){
                     createReportObject();
                     updateReport();
-                    getActivity().onBackPressed();
                 }
                 break;
         }

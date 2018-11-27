@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -320,8 +319,10 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
 
     private void addFocusChangeListener(EditText editText) {
         editText.setOnFocusChangeListener((view, b) -> {
-            if(!editText.getText().toString().equals("")){
-                ((AddReportActivity)getActivity()).setFilledFields(editText.getTag().toString(),editText.getText().toString());
+            if(!view.hasFocus()){
+                if(!editText.getText().toString().equals("")){
+                    ((AddReportActivity)getActivity()).setFilledFields(editText.getTag().toString(),editText.getText().toString());
+                }
             }
         });
     }

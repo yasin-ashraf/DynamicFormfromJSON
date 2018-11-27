@@ -24,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 /**
  * Created by im_yasinashraf started on 16/11/18.
@@ -32,6 +33,7 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
 
     private int id;
     private String report;
+    private String reportSlice;
     private ArrayList<String> fields;
     private Toolbar toolbar;
     private CollapsingToolbarLayout collapsingToolbarLayout;
@@ -40,6 +42,7 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
     private FloatingActionButton deleteButton;
     private AppBarLayout appBarLayout;
     private Boolean isInComposite = false;
+    private Stack<String> titles;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,6 +51,7 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
         id = getIntent().getExtras().getInt(getString(R.string.label_id));
         report = getIntent().getExtras().getString("json");
         fields = getIntent().getExtras().getStringArrayList(getString(R.string.label_fields));
+        titles = new Stack<>();
         init();
     }
 
@@ -78,11 +82,32 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
         return report;
     }
 
+    public String getReportSlice() {
+        return reportSlice;
+    }
+
     public void updateReport(String fieldName, String value){
+        titles.pop();
         try {
+            JSONObject valueObj = new JSONObject(value);
             JSONObject reportObj = new JSONObject(report);
-            reportObj.put(fieldName,value);
+            if(reportObj.has(fieldName)){
+                reportObj.put(fieldName,valueObj);
+
+            }else {
+                if(titles.size() > 1){
+                    JSONObject reportSlice = new JSONObject();
+                    reportSlice.put(fieldName,valueObj);
+                    for(int i = 0;i<reportSlice.names().length();i++){
+                        if(reportObj.getJSONObject(titles.peek()).has(reportSlice.names().getString(i))){
+                            reportObj.getJSONObject(titles.peek()).put(reportSlice.names().getString(i),reportSlice.get(reportSlice.names().getString(i)));
+                        }
+                    }
+                    this.reportSlice = reportObj.getJSONObject(titles.peek()).toString();
+                }
+            }
             this.report = reportObj.toString();
+            onBackPressed();
             Log.e("REPORT SLICE",report);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -108,6 +133,7 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
      * Add EditReport fragment to container to edit the fields.
      */
     private void showEditFields(){
+        titles.push(getString(R.string.label_a_report));
         Bundle args = new Bundle();
         args.putInt(getString(R.string.label_id),id);
         args.putBoolean(getString(R.string.label_isComposite),isInComposite);
@@ -121,10 +147,11 @@ public class ViewReportActivity extends AppCompatActivity implements View.OnClic
     }
 
     public void replaceWithCompositeFragment(String fieldName,String value, String compositeFields){
+        titles.push(fieldName);
         isInComposite = true;
+        this.reportSlice = value;
         Bundle args = new Bundle();
         args.putString(getString(R.string.label_fields),compositeFields);
-        args.putString(getString(R.string.label_value),value);
         args.putString(getString(R.string.label_fieldname),fieldName);
         args.putBoolean(getString(R.string.label_isComposite),isInComposite);
         EditReportFragment compositeFragment = new EditReportFragment();
