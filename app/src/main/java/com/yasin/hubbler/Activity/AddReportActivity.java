@@ -82,6 +82,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         titles.push(getString(R.string.label_a_report));
         Bundle args = new Bundle();
         args.putString(getString(R.string.label_fields),json);
+        args.putString(getString(R.string.label_report),reportObject.toString());
         AddReportFragment addReportFragment = new AddReportFragment();
         addReportFragment.setArguments(args);
         getSupportFragmentManager().beginTransaction()
@@ -90,13 +91,14 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                 .commit();
     }
 
-    public void replaceWithCompositeFragment(String fieldName, String compositeFields){
+    public void replaceWithCompositeFragment(String fieldName, String compositeFields, String value){
         bluePrints.push(compositeFields);
         pageTitle.setText(String.format(getString(R.string.label_add_a),fieldName));
         titles.push(fieldName);
         Bundle args = new Bundle();
         args.putString(getString(R.string.label_fields),compositeFields);
         args.putString(getString(R.string.label_fieldname),fieldName);
+        args.putString(getString(R.string.label_report), value.equals("") ? reportObject.toString() : value);
         AddReportFragment compositeFragment = new AddReportFragment();
         compositeFragment.setArguments(args);
         getSupportFragmentManager().beginTransaction()
@@ -105,10 +107,11 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                 .commit();
     }
 
-    private void moveBackToPreviousFragment(String fieldName,String fields){
+    private void moveBackToPreviousFragment(String fieldName,String fields,String value){
         Bundle args = new Bundle();
         args.putString(getString(R.string.label_fields), fields);
         args.putString(getString(R.string.label_fieldname),fieldName);
+        args.putString(getString(R.string.label_report),value);
         AddReportFragment compositeFragment = new AddReportFragment();
         compositeFragment.setArguments(args);
         getSupportFragmentManager().beginTransaction()
@@ -173,12 +176,12 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         bluePrints.pop();
         if(titles.size() > 0){
             pageTitle.setText(String.format(getString(R.string.label_add_a),titles.peek()));
-            moveBackToPreviousFragment(titles.peek(),bluePrints.peek());
 
             if(titles.size() > 1){
                 JSONObject reportSlice = new JSONObject();
                 reportSlice.put(event.getFieldName(),event.getValue());
                 reportObject.put(titles.peek(),reportSlice);
+                moveBackToPreviousFragment(titles.peek(),bluePrints.peek(),reportSlice.toString());
             }else {
                 if(reportObject.has(event.getFieldName())){
                     JSONObject jsonObject = event.getValue();
@@ -188,6 +191,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
                 }else {
                     reportObject.put(event.getFieldName(),event.getValue());
                 }
+                moveBackToPreviousFragment(titles.peek(),bluePrints.peek(),reportObject.toString());
             }
         }else {
             JSONObject jsonObject = event.getValue();
@@ -207,7 +211,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         titles.pop();
         if(titles.size() > 0){
             pageTitle.setText(String.format(getString(R.string.label_add_a),titles.peek()));
-            moveBackToPreviousFragment(titles.peek(),bluePrints.peek());
+            moveBackToPreviousFragment(titles.peek(),bluePrints.peek(),reportObject.toString());
         }else {
             super.onBackPressed();
         }

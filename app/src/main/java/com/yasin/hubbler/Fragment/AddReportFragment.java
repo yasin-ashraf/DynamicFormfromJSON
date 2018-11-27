@@ -17,6 +17,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.yasin.hubbler.Activity.AddReportActivity;
+import com.yasin.hubbler.Activity.ViewReportActivity;
 import com.yasin.hubbler.EventBus.OnReportUpdateEvent;
 import com.yasin.hubbler.R;
 import com.yasin.hubbler.Validators.EmailValidator;
@@ -50,6 +51,7 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
     private Boolean valid = false;
     private JSONObject reportObjectSlice;
     private String compositeFieldName;
+    private JSONObject report;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,22 +70,21 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_report, container, false);
-        initViews(view);
+        init(view);
         return view;
     }
 
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        parseJsonData(Objects.requireNonNull(getArguments()).getString(getString(R.string.label_fields)));
-    }
-
-    private void initViews(View view) {
+    private void init(View view) {
         container = view.findViewById(R.id.container);
         buttonDone = view.findViewById(R.id.button_done);
 
         buttonDone.setOnClickListener(this);
+        try {
+            report = new JSONObject(getArguments().getString(getString(R.string.label_report)));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        parseJsonData(Objects.requireNonNull(getArguments()).getString(getString(R.string.label_fields)));
     }
 
 
@@ -116,23 +117,27 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
                     compositeFields = viewObject.getJSONArray(getString(R.string.label_fields)).toString();
 
                 }
-                generateViews(type,fieldName,options,required,min,max,compositeFields);
+                String value = "";
+                if(report.has(fieldName)){
+                    value = report.getString(fieldName);
+                }
+                createViews(type,fieldName,options,required,min,max,compositeFields,value);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private void generateViews(String type,String fieldName,ArrayList<String> options,Boolean required,int min,int max,String compositeFields){// too much parameters??
+    private void createViews(String type,String fieldName,ArrayList<String> options,Boolean required,int min,int max, String compositeFields,String value){// too much parameters??
         container.addView(createTextView(fieldName));
         if(type.equals(getString(R.string.label_dropdown))){
             if (options != null) {
-                container.addView(createSpinner(fieldName,options));
+                container.addView(createSpinner(fieldName,options,value));
             }
         }else if(type.equals(getString(R.string.label_composite))) {
-            container.addView(createBoxView(fieldName, compositeFields));
+            container.addView(createBoxView(fieldName, compositeFields,value));
         }else {
-            container.addView(createEditText(type,fieldName,required,min,max));
+            container.addView(createEditText(type,fieldName,required,min,max,value));
         }
     }
 
@@ -186,27 +191,43 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
         }
     }
 
-    private LinearLayout createBoxView(String fieldName,String compositeFields){
-        LinearLayout linearLayout = compositeBoxViewGenerator.createBoxView(fieldName);
-        linearLayout.setOnClickListener(view -> {
-            ((AddReportActivity)Objects.requireNonNull(getActivity())).replaceWithCompositeFragment(fieldName,compositeFields);
-        });
-        return linearLayout;
-    }
-
     private TextView createTextView(String fieldName) {
         return textViewGenerator.generateTextView(fieldName);
     }
 
-    private EditText createEditText(String type, String fieldName, Boolean required,int min,int max){// too much parameters??
+    private EditText createEditText(String type, String fieldName, Boolean required, int min, int max, String value){
         EditText editText = editTextGenerator.generateEditText(type, fieldName, required);
+        editText.setText(value);
         addTextChangedListener(editText,type,min,max,fieldName);
         return editText;
     }
 
-    private Spinner createSpinner(String fieldName, ArrayList<String> options) {
-        Spinner spinner = spinnerGenerator.generateSpinner(options);
+    private LinearLayout createBoxView(String fieldName,String compositeFields, String value){
+        LinearLayout linearLayout = null;
+        if(!value.equals("")){
+            try {
+                JSONObject jsonObject = new JSONObject(value);
+                linearLayout = compositeBoxViewGenerator.createBoxViewWithTypedValues(jsonObject);
+                linearLayout.setOnClickListener(view -> {
+                    ((AddReportActivity)getActivity()).replaceWithCompositeFragment(fieldName,compositeFields,value);
+                });
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }else {
+            linearLayout = compositeBoxViewGenerator.createBoxView(fieldName);
+            linearLayout.setOnClickListener(view -> {
+                ((AddReportActivity)getActivity()).replaceWithCompositeFragment(fieldName,compositeFields,value);
+            });
+        }
 
+        return linearLayout;
+    }
+
+
+    private Spinner createSpinner(String fieldName, ArrayList<String> options,String value) {
+        Spinner spinner = spinnerGenerator.generateSpinner(options);
+        spinner.setSelection(options.indexOf(value));
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {

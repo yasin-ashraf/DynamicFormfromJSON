@@ -39,6 +39,7 @@
     <string name="label_fieldname">fieldName</string>
     <string name="label_time_ago">%d %s ago</string>
     <string name="label_a_report">a report</string>
+    <string name="label_report">report</string>
     <plurals name="days">
         <item quantity="one">day</item>
         <item quantity="other">days</item>

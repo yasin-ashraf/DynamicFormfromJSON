@@ -172,7 +172,7 @@ public class EditReportFragment extends Fragment implements View.OnClickListener
         return textViewGenerator.generateTextView(fieldName);
     }
 
-    private EditText createEditText(String type, String fieldName, Boolean required, int min, int max, String value){// too much parameters??
+    private EditText createEditText(String type, String fieldName, Boolean required, int min, int max, String value){
         EditText editText = editTextGenerator.generateEditText(type, fieldName, required);
         editText.setText(value);
         addTextChangedListener(editText,type,min,max);
