@@ -22,7 +22,7 @@ public class EditTextGenerator {
         this.context = context;
     }
 
-    public EditText generateEditText(String type, String fieldName, Boolean required){
+    public EditText generateEditText(String type, String fieldName, Boolean required, String compositeFieldName){
         EditText editText = new EditText(this.context);
         editText.setHint(String.format(context.getString(R.string.label_type_here), fieldName));
         editText.setHintTextColor(ContextCompat.getColor(this.context, R.color.hint));
@@ -42,8 +42,8 @@ public class EditTextGenerator {
             editText.setInputType(InputType.TYPE_CLASS_NUMBER);
         }
         editText.setLayoutParams(getEditFieldLayoutParams());
-        if (required) editText.setTag(context.getString(R.string.label_required) + ";" + fieldName);
-        else editText.setTag(fieldName);//set required tag
+        if (required) editText.setTag(fieldName + ";" +  compositeFieldName + ";" + context.getString(R.string.label_required));
+        else editText.setTag(fieldName + ";" +  compositeFieldName);
         return editText;
     }
 

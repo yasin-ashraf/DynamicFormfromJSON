@@ -26,6 +26,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -39,6 +41,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
     private JSONObject reportObject;
     private Stack<String> titles;
     private Stack<String> bluePrints;
+    private Map<String,String> filledFields;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,6 +51,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         reportObject = new JSONObject();
         titles = new Stack<>();
         bluePrints = new Stack<>();
+        filledFields = new HashMap<>();
         init();
         readJsonFile();
     }
@@ -58,6 +62,14 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         pageTitle = findViewById(R.id.label_add_a_report);
 
         backButton.setOnClickListener(this);
+    }
+
+    public Map<String, String> getFilledFields() {
+        return filledFields;
+    }
+
+    public void setFilledFields(String tag,String value) {
+        this.filledFields.put(tag,value);
     }
 
     private void readJsonFile() {

@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.yasin.hubbler.Activity.AddReportActivity;
-import com.yasin.hubbler.Activity.ViewReportActivity;
 import com.yasin.hubbler.EventBus.OnReportUpdateEvent;
 import com.yasin.hubbler.R;
 import com.yasin.hubbler.Validators.EmailValidator;
@@ -146,19 +146,11 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
             String viewClass = container.getChildAt(i).getClass().getName();
             if (viewClass.contains("EditText")) {
                 EditText et = (EditText) container.getChildAt(i);
-                if (et.getTag() != null && et.getTag().toString().contains(getString(R.string.label_required))) {
-                    String[] data = et.getTag().toString().split(";");
-                    try {
-                        reportObjectSlice.put(data[1],et.getText().toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }else {
-                    try {
-                        reportObjectSlice.put(et.getTag().toString(),et.getText().toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                String[] data = et.getTag().toString().split(";");
+                try {
+                    reportObjectSlice.put(data[0],et.getText().toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -196,9 +188,11 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
     }
 
     private EditText createEditText(String type, String fieldName, Boolean required, int min, int max, String value){
-        EditText editText = editTextGenerator.generateEditText(type, fieldName, required);
-        editText.setText(value);
-        addTextChangedListener(editText,type,min,max,fieldName);
+        EditText editText = editTextGenerator.generateEditText(type, fieldName, required,compositeFieldName);
+        setEditFieldText(editText,value);
+        addEditorActionListener(editText);
+        addFocusChangeListener(editText);
+        addTextChangedListener(editText,type,min,max);
         return editText;
     }
 
@@ -227,12 +221,13 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
 
     private Spinner createSpinner(String fieldName, ArrayList<String> options,String value) {
         Spinner spinner = spinnerGenerator.generateSpinner(options);
-        spinner.setSelection(options.indexOf(value));
+        setSelectionOfSpinner(spinner,fieldName,options,value);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 try {
                     reportObjectSlice.put(fieldName,adapterView.getSelectedItem().toString());
+                    ((AddReportActivity)getActivity()).setFilledFields(fieldName,adapterView.getSelectedItem().toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -250,7 +245,27 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
         return spinner;
     }
 
-    private void addTextChangedListener(EditText editText,String type,int min,int max,String fieldName){
+    private void setSelectionOfSpinner(Spinner spinner, String fieldName, ArrayList<String> options, String value){
+        if(value.equals("")){
+            if(((AddReportActivity)getActivity()).getFilledFields().containsKey(fieldName)){
+                spinner.setSelection(options.indexOf(((AddReportActivity)getActivity()).getFilledFields().get(fieldName)));
+            }
+        }else {
+            spinner.setSelection(options.indexOf(value));
+        }
+    }
+
+    private void setEditFieldText(EditText editText,String value){
+        if(value.equals("")){
+            if(((AddReportActivity)getActivity()).getFilledFields().containsKey(editText.getTag().toString())){
+                editText.setText(((AddReportActivity)getActivity()).getFilledFields().get(editText.getTag().toString()));
+            }
+        }else {
+            editText.setText(value);
+        }
+    }
+
+    private void addTextChangedListener(EditText editText,String type,int min,int max){
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -284,13 +299,29 @@ public class AddReportFragment extends Fragment implements View.OnClickListener 
                         break;
 
                      default:
-
                         break;
                 }
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
+            }
+        });
+    }
+
+    private void addEditorActionListener(EditText editText){
+        editText.setOnEditorActionListener((textView, i, keyEvent) -> {
+            if(!editText.getText().toString().equals("")){
+                ((AddReportActivity)getActivity()).setFilledFields(editText.getTag().toString(),editText.getText().toString());
+            }
+            return false;
+        });
+    }
+
+    private void addFocusChangeListener(EditText editText) {
+        editText.setOnFocusChangeListener((view, b) -> {
+            if(!editText.getText().toString().equals("")){
+                ((AddReportActivity)getActivity()).setFilledFields(editText.getTag().toString(),editText.getText().toString());
             }
         });
     }
