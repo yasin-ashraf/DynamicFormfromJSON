@@ -95,6 +95,7 @@ public class AddReportActivity extends AppCompatActivity implements View.OnClick
         Bundle args = new Bundle();
         args.putString(getString(R.string.label_fields),json);
         args.putString(getString(R.string.label_report),reportObject.toString());
+        args.putString(getString(R.string.label_fieldname),getString(R.string.label_a_report));
         AddReportFragment addReportFragment = new AddReportFragment();
         addReportFragment.setArguments(args);
         getSupportFragmentManager().beginTransaction()
